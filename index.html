@@ -8,11 +8,11 @@
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
-  <title>SOL Wallet 8.0 — EUR € та UAH ₴</title>
+  <title>SOL Wallet 9.0 — EUR € та UAH ₴</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="stylesheet" href="./budget.css">
-  <link rel="stylesheet" href="./currency.css">
+  <link rel="stylesheet" href="./currency.css?v=9">
 
 
   <style>
@@ -273,11 +273,11 @@
   <section class="gate-card">
     <div class="gate-symbol">S</div>
     <div class="eyebrow">ПРИВАТНИЙ ФІНАНСОВИЙ ПРОСТІР</div>
-    <h1>SOL Wallet <span>6.0</span></h1>
-    <p class="gate-lead">Кожне євро на своєму місці. А доступ до бюджету — тільки з твоїм ключем.</p>
+    <h1>SOL Wallet <span>9.0</span></h1>
+    <p class="gate-lead">Кожне євро та кожна гривня — на своєму місці. Доступ лише з твоїм ключем.</p>
     <div id="vaultGateContent"></div>
     <div class="gate-message" id="vaultGateMessage" role="status" aria-live="polite"></div>
-    <div class="gate-foot">🔐 AES-256-GCM · Без банківських реквізитів · EUR</div>
+    <div class="gate-foot">🔐 AES-256-GCM · Без банківських реквізитів · EUR / UAH</div>
   </section>
 </div>
 <div class="app locked">
@@ -298,9 +298,12 @@
   </aside>
   <main class="main">
     <div class="topbar">
-      <div><div class="eyebrow">ТВОЯ ФІНАНСОВА СИСТЕМА</div><h2 id="pageTitle">Мої гроші — мій план</h2><p class="sub" id="pageSubtitle">Побач, де кожне євро, перш ніж його витратити.</p></div>
+      <div><div class="eyebrow">ТВОЯ ФІНАНСОВА СИСТЕМА</div><h2 id="pageTitle">Мої гроші — мій план</h2><p class="sub" id="pageSubtitle">Побач, де кожне євро та кожна гривня.</p></div>
       <div class="topbar-right"><div class="security-controls"><span id="vaultStatus" class="pill-status">🔒 Зачинено</span><button class="btn small ghost" id="installApp" type="button" hidden>📲 Встановити</button><button class="btn small ghost" id="lockWallet" type="button">Заблокувати</button></div><div class="wallet-toggle" role="group" aria-label="Вибрати гаманець"><button data-wallet="personal" class="active">🏠 Сім'я</button><button data-wallet="business">💼 Бізнес BMH</button></div></div>
     </div>
+    <button type="button" id="openCurrenciesDashboard" class="currency-quicklink" aria-label="Відкрити гаманці євро та гривня">
+      <span class="currency-quick-icons">💶 ₴</span><span class="currency-quick-copy"><strong>Мої валюти: € / ₴</strong><small>BMH і сім’я · картки · джерела надходжень</small></span><span class="currency-quick-arrow">→</span>
+    </button>
     <div id="content"></div>
     <div class="bottom-note">SOL Wallet v6.0 · Шифрований фінансовий планувальник, не банк і не податкова консультація · Усі суми в EUR</div>
   </main>
@@ -310,6 +313,7 @@
   <button data-page="calendar"><span class="mi">▦</span>Календар</button>
   <button data-page="debts"><span class="mi">▥</span>Борги</button>
   <button data-page="forecast"><span class="mi">↗</span>Прогноз</button>
+  <button type="button" id="openCurrenciesMobile" class="currency-nav-open"><span class="mi">€₴</span>Валюти</button>
   <button data-page="more"><span class="mi">☷</span>Ще</button>
 </nav>
 <div id="modalBackdrop" class="modal-backdrop" role="presentation"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><h3 id="modalTitle"></h3><p id="modalSubtitle"></p></div><button type="button" class="close" data-close="1" aria-label="Закрити">×</button></div><div id="modalContent" class="modal-content"></div></div></div>
@@ -1417,7 +1421,7 @@
 
 </script>
 <script src="./budget.js"></script>
-<script src="./currency-core.js"></script>
-<script src="./currency-ui.js"></script>
+<script src="./currency-core.js?v=9"></script>
+<script src="./currency-ui.js?v=9"></script>
 </body>
 </html>

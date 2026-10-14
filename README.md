@@ -1,18 +1,36 @@
-# SOL Wallet 8.0 — EUR / UAH
+# SOL Wallet 9.0 — євро, гривня та джерела надходжень
 
-Personal, manually operated budget web application for BMH and family. This repository contains public frontend code **only**, never private financial transactions, banking credentials, passwords, or encrypted backup files.
+Особистий вебзастосунок для розподілу грошей BMH і сім'ї. У цьому публічному репозиторії міститься **лише код застосунку**, без сімейних доходів, номерів карток, паролів чи приватних резервних копій.
 
-## EUR + UAH
+## Як відкрити валютний гаманець на телефоні
 
-- Four independent category balances: BMH EUR, BMH UAH, family EUR, family UAH.
-- Existing EUR transactions from SOL Wallet 7.0 remain EUR, with their original amounts untouched.
-- UAH income, spending, category transfers, and BMH-to-family transfers are separately recorded in the same encrypted vault.
-- Name multiple EUR and UAH cards/accounts to tag transactions. This is manual book-keeping, not a bank connection.
-- EUR-to-UAH and UAH-to-EUR conversions are logged as two sides of **one actual transaction**, based on the exact source amount and actual net credited amount. No fabricated exchange rate, money transfer, or automatic conversion occurs.
-- UAH monthly targets are separate from EUR targets. Separate currencies are **never automatically added** into a combined balance.
-- Unified EUR + UAH CSV is intentionally **unencrypted**. Users are warned before export.
-- Existing local vault passphrase remains unchanged. Encrypted backup/export should be kept regularly.
+1. Відкрий https://bodnarchuk96.github.io/sol-wallet-web/?wallets=1&v=9
+2. Розблокуй гаманець своєю звичайною секретною фразою (нова не потрібна).
+3. Натисни **«€₴ Валюти»** внизу екрана або **«Мої валюти: € / ₴»** на головному екрані.
+4. Обери **BMH / Сім’я** і **EUR / UAH**. На екрані — чотири незалежні баланси.
 
-## Security and limits
+## Як додати джерело надходження
 
-Static site hosted via GitHub Pages. Financial data is encrypted in browser storage using existing vault code (AES-256-GCM / PBKDF2). A browser, device, profile or origin change can prevent automatic access to local data; keep encrypted backups. Real bank transactions, verified live FX rates and multi-device sync are **not** connected. Foreign currency receipts may require correct tax/accounting conversion under applicable law; do not mistake this manual budget for German EÜR, tax filings, or bank statements.
+1. У розділі «Валюти € / ₴» вибери потрібний бюджет і валюту.
+2. Натисни **«＋ Джерело доходу»**.
+3. Напиши назву — наприклад, «Оплата клієнта BMH», «Виплата з відеоплатформи», «Зарплата» або «Переказ з України». Це **лише приклади**, вони не створені як реальні надходження.
+4. За бажанням вкажи частоту (разове, щомісячне, нерегулярне), очікувану суму та назву картки/рахунку.
+5. Натисни «Зберегти операцію». Джерело буде доступне в меню «Надходження».
+
+**Важливо:** очікувана сума лише для планування. Вона **не додається до балансу**.
+
+## Як зарахувати фактичні гроші
+
+1. Натисни **«＋ Надходження»** та вибери збережене джерело.
+2. Вкажи суму, дату й картку/рахунок.
+3. Переглянь автоматичний розподіл і підтверди запис.
+4. Після цього сума буде зарахована **лише у вибраній валюті**.
+
+## Облік валюти та безпека
+
+- Старі записи у євро залишаються у EUR. Гривневі операції мають окрему історію й цілі.
+- Конвертацію EUR↔UAH записуй лише за **фактичними** списаною та отриманою сумами (комісії враховуються в реальній сумі).
+- Назви рахунків — ручний облік. Банки та платіжні платформи не підключені.
+- Дані зберігаються зашифрованими у браузері; автоматичної синхронізації між пристроями ще немає.
+- Перед заповненням справжніх сум зроби зашифровану резервну копію. Не зберігай пароль або незашифровану історію в публічному GitHub.
+- Це фінансовий планувальник, не банківська система, німецька EÜR чи податкова декларація.

@@ -29,6 +29,18 @@ function accountsBlock(s){
  + items.map(a=>'<div class="mc-account"><span>'+esc(a.name)+'</span><strong>'+C.money(ab[a.id]||0,currency)+'</strong></div>').join('')
  + '<button class="mc-action" data-mc-action="account">＋ Додати картку / рахунок</button></section>';
 }
+function sourceOptions(s,w,c){
+ const sources=(C.ledger(s).sources||[]).filter(q=>q.wallet===w&&q.currency===c);
+ return '<label class="mc-field">Звідки прийшли кошти<select name="source"><option value="">Інше / разове надходження</option>'+sources.map(q=>'<option value="'+esc(q.id)+'">'+esc(q.name)+(q.frequency==='monthly'?' · щомісяця':'')+'</option>').join('')+'</select></label>';
+}
+function sourcesBlock(s){
+ const sources=(C.ledger(s).sources||[]).filter(q=>q.wallet===wallet&&q.currency===currency);
+ const projected=sources.filter(q=>q.frequency==='monthly').reduce((sum,q)=>sum+q.expectedCents,0);
+ return '<section class="mc-card mc-sources"><h3>📥 Джерела надходжень · '+labels[currency]+'</h3><p class="mc-tip">Збережи клієнта, роботу чи платформу. Планова сума — лише очікування, не баланс. Реальні гроші потрібно записувати вручну.</p>'+
+ (sources.length?sources.map(q=>'<div class="mc-account"><span>'+esc(q.name)+'<small style="display:block;color:#8faebc">'+(q.frequency==='monthly'?'Щомісяця':q.frequency==='once'?'Разове':'Нерегулярне')+' · '+esc(accountName(s,q.accountId))+'</small></span><strong>'+(q.expectedCents?C.money(q.expectedCents,currency):'Без плану')+'</strong></div>').join(''):'<p class="mc-tip">Поки що жодного джерела не створено.</p>')+
+ (projected?'<p class="mc-tip">Орієнтовні регулярні надходження: '+C.money(projected,currency)+' на місяць. До доступних грошей не додано.</p>':'')+
+ '<button type="button" class="mc-action" data-mc-action="source">＋ Додати джерело доходу</button></section>';
+}
 function rows(s,b){
  return s.wallets[wallet].categories.map(c=>'<div class="mc-cat"><div class="mc-cat-name">'+esc(c.icon)+'<div>'+esc(c.name)+'<span>'+c.pct+'% · '+(c.kind==='protected'?'резерв':'гнучкі кошти')+'</span></div></div><b>'+C.money(b[c.id],currency)+'</b></div>').join('');
 }
@@ -54,14 +66,21 @@ function history(s){
 }
 function formFor(s,b){
  const other=currency==='EUR'?'UAH':'EUR',ca=s.wallets[wallet].categories,defaultFrom=ca.find(c=>(b[c.id]||0)>0)?.id||ca[0].id;
- const acts=['income','expense','move','owner','fx','accountMove','targets','account'];
- const captions={income:'＋ Надходження',expense:'− Витрата',move:'⇄ Конверти',owner:'↗ Виплатити собі',fx:'💱 Обмін EUR / UAH',accountMove:'🏦 Між рахунками',targets:'🎯 Місячні цілі ₴',account:'＋ Новий рахунок'};
+ const acts=['income','source','expense','move','owner','fx','accountMove','targets','account'];
+ const captions={income:'＋ Надходження',source:'＋ Джерело доходу',expense:'− Витрата',move:'⇄ Конверти',owner:'↗ Виплатити собі',fx:'💱 Обмін EUR / UAH',accountMove:'🏦 Між рахунками',targets:'🎯 Місячні цілі ₴',account:'＋ Новий рахунок'};
  let form='',intro='';
  const options='<div class="mc-actions">'+acts.map(k=>'<button type="button" class="mc-action'+(mode===k?' active':'')+'" data-mc-action="'+k+'">'+captions[k]+'</button>').join('')+'</div>';
  if(mode==='income'){
   intro='Отримані гроші будуть автоматично поділені між конвертами <b>'+labels[wallet]+' · '+labels[currency]+'</b>.';
-  form=moneyField('amount','Надійшло, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','Куди надійшли')+'</div>'+noteField('Клієнт, виплата, стартовий баланс')+'<div class="mc-allocation" id="mcAllocation">Введи суму для попереднього розподілу.</div>';
- }else if(mode==='expense'){
+  form=sourceOptions(s,wallet,currency)+moneyField('amount','Надійшло, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','Куди надійшли')+'</div>'+noteField('Клієнт, виплата, стартовий баланс')+'<div class="mc-allocation" id="mcAllocation">Введи суму для попереднього розподілу.</div>';
+ }else if(mode==='source'){
+ intro='Джерело — лише шаблон. Реальні надходження зараховуються окремо через кнопку «Надходження». Не заповнюй чужих реквізитів чи номерів карток.';
+ form='<label class="mc-field">Назва джерела<input name="sourceName" maxlength="90" required placeholder="Клієнт BMH, платформа, зарплата..."></label>'+
+ '<label class="mc-field">Як часто<select name="frequency"><option value="irregular">Нерегулярно</option><option value="monthly">Щомісяця</option><option value="once">Разово</option></select></label>'+
+ '<label class="mc-field">Очікувано на місяць, '+currency+' (необов’язково)<input name="expected" inputmode="decimal" placeholder="0,00"></label>'+
+ accountOptions(s,wallet,currency,'account','Картка за замовчуванням (за бажанням)')+
+ '<div class="mc-note">💡 Шаблон не створює доходу та не змінює суму в гаманці. Сума тут — лише прогноз.</div>';
+}else if(mode==='expense'){
   intro='Записана витрата зменшить вибраний конверт <b>лише в '+currency+'</b>.';
   form=catOptions(s,wallet,'category','З якого конверта',b)+moneyField('amount','Витрачено, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','З якого рахунку')+'</div>'+noteField('Що оплачено');
  }else if(mode==='move'){
@@ -96,13 +115,13 @@ function formFor(s,b){
 function render(message='',error=false){
  if(!panel||panel.hidden)return;
  const s=sn(),b=C.balances(s),now=b[currency][wallet];
- panel.innerHTML='<div class="mc-shell"><div class="mc-header"><div><div class="mc-muted">SOL WALLET · MULTI-CURRENCY 8.0</div><h2>💶 Євро + гривня</h2><p>Дві валюти, дві сфери життя. Жодного змішування сум без реальної конвертації.</p></div><button class="mc-close" data-mc-close aria-label="Закрити">✕</button></div>'
+ panel.innerHTML='<div class="mc-shell"><div class="mc-header"><div><div class="mc-muted">SOL WALLET · MULTI-CURRENCY 9.0</div><h2>💶 Євро + гривня</h2><p>Дві валюти, дві сфери життя. Жодного змішування сум без реальної конвертації.</p></div><button class="mc-close" data-mc-close aria-label="Закрити">✕</button></div>'
  +'<div class="mc-grid4">'+tiles(s,b)+'</div>'
  +'<div class="mc-controls"><div class="mc-tabs">'+['business','personal'].map(w=>'<button data-mc-wallet="'+w+'" class="'+(w===wallet?'active':'')+'">'+labels[w]+'</button>').join('')+'</div>'
  +'<div class="mc-tabs">'+['EUR','UAH'].map(c=>'<button data-mc-currency="'+c+'" class="'+(c===currency?'active':'')+'">'+labels[c]+'</button>').join('')+'</div></div>'
  +'<div class="mc-note">📌 '+labels[wallet]+' · '+labels[currency]+': <b>'+C.money(C.sumWallet(b,currency,wallet),currency)+'</b>. Євро й гривні не підсумовуються. Введені суми — ручний облік, не залишки банку.</div>'
  +'<div class="mc-content"><div><section class="mc-card"><h3>📦 Конверти · '+labels[currency]+'</h3>'+rows(s,now)+'</section>'
- +'<div style="margin-top:13px">'+accountsBlock(s)+'</div></div><div>'+formFor(s,now)+'</div></div>'
+ +'<div style="margin-top:13px">'+accountsBlock(s)+'</div><div style="margin-top:13px">'+sourcesBlock(s)+'</div></div><div>'+formFor(s,now)+'</div></div>'
  +'<section class="mc-card mc-history"><h3>🧾 Останні записи · '+labels[currency]+'</h3>'+history(s)+'</section>'
  +'<div class="mc-warning">⚠️ Для німецького бухгалтерського та податкового обліку валютні доходи потребують відповідного перерахунку й документів. Тут облік реальних сум за валютами, а не податкова декларація. Ця система не переказує коштів між банками.</div>'
  +'<div class="mc-actions"><button type="button" class="mc-action" data-mc-export="1">⬇️ Експорт усіх операцій (CSV · € + ₴)</button><button type="button" class="mc-action" data-mc-close="1">← Назад до SOL Wallet</button></div></div>';
@@ -129,10 +148,20 @@ async function write(mut,message){
 function submit(f){
  const date=field(f,'date')||C.dateNow(),note=field(f,'note').trim().slice(0,250),acct=field(f,'account');
  const c=currency,w=wallet,other=c==='EUR'?'UAH':'EUR';
+ if(mode==='source'){
+  const name=field(f,'sourceName').trim(),frequency=field(f,'frequency'),accountId=field(f,'account');
+  if(!name||name.length>90)throw Error('Напиши назву джерела (до 90 символів)');
+  const raw=field(f,'expected').trim(),expectedCents=raw&&Number(raw.replace(',','.'))!==0?C.parse(raw):0;
+  return write(s=>{const l=C.ensure(s);if(l.sources.length>=100)throw Error('Занадто багато джерел');
+   l.sources.push({id:C.uuid(),wallet:w,currency:c,name,frequency,accountId,expectedCents});
+  },'✅ Джерело збережено. Надходження з нього ще не зараховане.');
+ }
  if(mode==='income'){
-  const n=C.parse(field(f,'amount'));return write(s=>{
-   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'income',wallet:w,cents:n,date,note,accountId:acct,allocations:api.currencyPlan(w,n,date)});
-   else C.ensure(s).events.push({id:C.uuid(),type:'uah_income',wallet:w,cents:n,date,note,accountId:acct,allocations:C.allocateUAH(s,w,n,date)});
+  const n=C.parse(field(f,'amount')),sourceId=field(f,'source');return write(s=>{
+   const source=(C.ledger(s).sources||[]).find(q=>q.id===sourceId&&q.wallet===w&&q.currency===c);
+   const effectiveNote=note||source?.name||'',effectiveAccount=acct||source?.accountId||'';
+   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',allocations:api.currencyPlan(w,n,date)});
+   else C.ensure(s).events.push({id:C.uuid(),type:'uah_income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',allocations:C.allocateUAH(s,w,n,date)});
   },'✅ '+C.money(n,c)+' отримано й розподілено.');
  }
  if(mode==='expense'){
@@ -195,6 +224,7 @@ function mount(){
  const nav=d.querySelector('.side .nav');if(nav&&!d.getElementById('openCurrencies')){
   const btn=d.createElement('button');btn.id='openCurrencies';btn.type='button';btn.innerHTML='<span class="ico">💶</span> Валюти € / ₴';nav.insertBefore(btn,d.getElementById('openBudgetPlan')||nav.querySelector('[data-page="rules"]')||nav.lastElementChild);btn.addEventListener('click',open);
  }
+ for(const name of ['openCurrenciesMobile','openCurrenciesDashboard'])d.getElementById(name)?.addEventListener('click',open);
  panel=d.createElement('section');panel.id='solCurrencyPanel';panel.hidden=true;panel.tabIndex=-1;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Валютні гаманці EUR та UAH');d.body.appendChild(panel);
  panel.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;
   if(btn.hasAttribute('data-mc-close')){close();return;}
@@ -205,8 +235,12 @@ function mount(){
   if(btn.dataset.mcExport){exportAllCsv(sn());return;}
  });
  panel.addEventListener('input',e=>{if(['amount','fromAmount','toAmount'].includes(e.target.name))updatePreview()});
+ panel.addEventListener('change',e=>{if(e.target.name!=='source')return;const s=sn(),f=d.getElementById('mcForm'),source=(C.ledger(s).sources||[]).find(x=>x.id===e.target.value);if(!f||!source)return;
+  const a=f.elements.namedItem('account'),n=f.elements.namedItem('note');if(a&&source.accountId)a.value=source.accountId;if(n&&!n.value)n.value=source.name;
+ });
  panel.addEventListener('submit',e=>{if(e.target.id!=='mcForm')return;e.preventDefault();try{submit(e.target)}catch(err){const msg=d.getElementById('mcMessage');if(msg){msg.hidden=false;msg.classList.add('error');msg.textContent='⚠️ '+err.message;}}});
  d.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)close()});
+ const oldLoad=api.loadSnapshot;api.loadSnapshot=function(){const value=oldLoad.apply(this,arguments);if(new URLSearchParams(root.location.search).get('wallets')==='1'||root.location.hash==='#currencies')root.setTimeout(open,80);return value;};
  const oldLock=api.onLock;api.onLock=function(){close();return oldLock.apply(this,arguments)};
  const oldRestore=api.afterRestore;api.afterRestore=function(){const result=oldRestore.apply(this,arguments);if(!panel.hidden)render();return result;};
 }
