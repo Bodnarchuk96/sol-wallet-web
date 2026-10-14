@@ -1,6 +1,6 @@
-/* SOL Wallet 7 offline shell: only static files, never users' financial data. */
-const CACHE='sol-wallet-v7-shell-2026-10-14';
-const SHELL=['./','./index.html','./budget.js','./budget.css','./manifest.webmanifest','./icon.svg','./robots.txt'];
+/* SOL Wallet 8 offline shell. Cache only application assets; encrypted finances remain in browser storage. */
+const CACHE='sol-wallet-v8-eur-uah-2026-10-14';
+const SHELL=['./','./index.html','./budget.js','./budget.css','./currency-core.js','./currency-ui.js','./currency.css','./manifest.webmanifest','./icon.svg','./robots.txt'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('sol-wallet-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==self.location.origin||!u.pathname.startsWith(new URL(self.registration.scope).pathname))return;e.respondWith((async()=>{try{const r=await fetch(e.request,{cache:'no-store'});if(r.ok){const c=await caches.open(CACHE);await c.put(e.request,r.clone())}return r}catch(_){return await caches.match(e.request)||(e.request.mode==='navigate'?await caches.match('./index.html'):Response.error())}})())});

@@ -152,7 +152,7 @@ function modelContext(s){
 function renderPanel(){
  const s=snapshot();const cats=visibleCategories(s,currentWallet),isBusiness=currentWallet==='business';const p=workingModel||getModel(s);
  panel.innerHTML=`<div class="sol-budget-wrap" tabindex="-1">
- <div class="budget-top"><div><div class="eyebrow">SOL WALLET · БЮДЖЕТ 7.0</div><h2>Кожному євро — своє місце</h2><p>Плануємо витрати без зайвих оплат і без змішування BMH із сім’єю.</p></div><button class="budget-close" data-budget-close aria-label="Закрити бюджет">✕</button></div>
+ <div class="budget-top"><div><div class="eyebrow">SOL WALLET · БЮДЖЕТ 7.0</div><h2>Євровий бюджет BMH і сім’ї</h2><p>Цей розрахунок лише в євро. Гривневі надходження та цілі — у вкладці «Валюти € / ₴».</p></div><button class="budget-close" data-budget-close aria-label="Закрити бюджет">✕</button></div>
  <div class="budget-tabbar"><button data-budget-tab="business" class="${isBusiness?'selected':''}">🏢 Бізнес BMH</button><button data-budget-tab="personal" class="${!isBusiness?'selected':''}">🏠 Сім’я</button></div>
  <div class="budget-note">💡 0 € у місячній цілі означає <strong>«суму ще не внесено»</strong>, а не «це безкоштовно». Це план, не рух коштів. Фактичні гроші записуй у звичайному розділі «Надходження».</div>
  <div class="budget-grid"><section class="budget-card"><h3>1. Планові надходження</h3>

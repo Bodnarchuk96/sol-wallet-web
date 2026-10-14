@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1823">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-f4XiC5FchitrtvpFCsaS59SnviJXwv38zatVri2LV0M=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-XUrLYbxVu2a98A6GHtsroRFYp3yC/W8u48uBsOHbh1U='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-f4XiC5FchitrtvpFCsaS59SnviJXwv38zatVri2LV0M=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-xvDQQmZxrPR1JgYqG18olwOkA9bStx+DaBh8Mu0frG8='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
-  <title>SOL Wallet 7.0 — особистий бюджет і нагадування</title>
+  <title>SOL Wallet 8.0 — EUR € та UAH ₴</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="stylesheet" href="./budget.css">
+  <link rel="stylesheet" href="./currency.css">
 
 
   <style>
@@ -1085,7 +1086,7 @@
       else if(t.type==='expense')b[t.wallet][t.category]-=t.cents;
       else if(t.type==='move'){b[t.wallet][t.from]-=t.cents;b[t.wallet][t.to]+=t.cents}
       else if(t.type==='owner'){b.business.owner-=t.cents;for(const a of t.allocations)b.personal[a.id]+=a.cents;}}
-   return b}
+   return window.SOLCurrency?.augmentEURBalances(b,state)||b}
  function walletSum(b,w){return Object.values(b[w]).reduce((s,v)=>s+v,0)}
  function monthData(w,m){const funded={},spent={};for(const c of getCats(w)){funded[c.id]=0;spent[c.id]=0}
    for(const t of state.transactions){if(!t.date.startsWith(m))continue;
@@ -1093,6 +1094,7 @@
      if(t.type==='owner' && w==='personal')for(const a of t.allocations)funded[a.id]+=a.cents;
      if(t.type==='expense' && t.wallet===w)spent[t.category]+=t.cents;
      if(t.type==='move' && t.wallet===w){funded[t.from]-=t.cents;funded[t.to]+=t.cents}}
+   for(const e of state.currencyLedger?.events||[]){if(e.type!=='exchange'||e.wallet!==w||!e.date.startsWith(m))continue;if(e.fromCurrency==='EUR')funded[e.fromCategory]-=e.fromCents;if(e.toCurrency==='EUR')funded[e.toCategory]+=e.toCents;}
    return {funded,spent}}
  function txSignedAmount(t,w){if(t.type==='income')return t.wallet===w?t.cents:null;
    if(t.type==='expense')return t.wallet===w?-t.cents:null;
@@ -1112,8 +1114,9 @@
       if(t.type==='expense'){if(!['personal','business'].includes(t.wallet)||!exists(t.wallet,t.category))throw Error('Категорія витрат відсутня');b[t.wallet][t.category]-=t.cents}
       if(t.type==='move'){if(!['personal','business'].includes(t.wallet)||!exists(t.wallet,t.from)||!exists(t.wallet,t.to)||t.from===t.to)throw Error('Невірне переміщення');b[t.wallet][t.from]-=t.cents;b[t.wallet][t.to]+=t.cents}
       if(t.type==='owner'){if(!Array.isArray(t.allocations)||t.allocations.reduce((s,a)=>s+a.cents,0)!==t.cents)throw Error('Помилка переказу собі');b.business.owner-=t.cents;for(const a of t.allocations){if(!exists('personal',a.id)||!Number.isSafeInteger(a.cents)||a.cents<0)throw Error('Помилка особистої категорії');b.personal[a.id]+=a.cents}}
-      if(Object.values(b.personal).some(n=>n<0)||Object.values(b.business).some(n=>n<0))throw Error('Операції перевищують доступні кошти');
+      if((Object.values(b.personal).some(n=>n<0)||Object.values(b.business).some(n=>n<0))&&!o.currencyLedger?.events?.some(e=>e.type==='exchange'&&e.toCurrency==='EUR'))throw Error('Операції перевищують доступні кошти');
    }
+   window.SOLCurrency?.validate(o);
    window.SOLPlanner.validatePlanner(o);
    window.SOLReminders.validateSettings(o);
  }
@@ -1363,11 +1366,11 @@
  function addOwner(){const cents=requireCents(),date=requireDate(),b=balances().business.owner;if(cents>b)throw Error(`На виплату собі доступно ${money(b)}`);addTx({id:id(),type:'owner',cents,date,note:document.getElementById('modalNote').value.trim(),allocations:plannedAllocation(cents,'personal',date)});closeModal();toast(`${money(cents)} перенесено до сімейного бюджету`)}
  function saveRules(){const els=Array.from(document.querySelectorAll('[data-edit-row]')),cats=[],ids=new Set();for(const el of els){const cat=category(ui.wallet,el.dataset.editRow),field=n=>el.querySelector(`[data-edit="${n}"]`).value;const name=field('name').trim(),pct=Number(field('pct')),target=parseEuro(field('target')),due=Number(field('due'));if(!name||name.length>60||!Number.isInteger(pct)||pct<0||pct>100||!Number.isSafeInteger(target)||target<0||target>1e11||!Number.isInteger(due)||due<0||due>31)throw Error('Перевір назви, відсотки, цілі та дати');const c={...cat,name,pct,target,due,kind:field('kind')};if(ids.has(c.id))throw Error('Дубль категорії');ids.add(c.id);cats.push(c)}const sum=cats.reduce((s,c)=>s+c.pct,0);if(sum!==100)throw Error(`Зараз ${sum}%. Потрібно рівно 100%`);state.wallets[ui.wallet].categories=cats;save();render();toast('Правила збережені · наступні доходи підуть за новою схемою')}
  function updateRatio(){const all=[...document.querySelectorAll('[data-edit="pct"]')];if(!all.length)return;const sum=all.reduce((s,e)=>s+(Number(e.value)||0),0);const r=document.getElementById('ratio');if(r){r.textContent=`Всього: ${sum}% із 100%`;r.classList.toggle('error',sum!==100)}}
- function removeCategory(k){const w=ui.wallet,b=balances()[w];if(k==='owner')throw Error('Категорію «Виплати собі» не можна видалити');if([...planner().bills,...planner().debts].some(x=>x.wallet===w&&x.categoryId===k))throw Error('Конверт використовується в календарі платежів або боргах. Спочатку зміни ці записи.');if(b[k]!==0)throw Error('Не можна видалити конверт з коштами');const used=state.transactions.some(t=>(t.wallet===w&&([t.category,t.from,t.to].includes(k)||t.allocations?.some(a=>a.id===k)))||(t.type==='owner'&&w==='personal'&&t.allocations?.some(a=>a.id===k)));if(used)throw Error('Категорія вже є в журналі. Збережи її для історії.');if(!confirm(`Видалити категорію «${category(w,k).name}»?`))return;state.wallets[w].categories=getCats(w).filter(c=>c.id!==k);save();render();toast('Категорію видалено')}
+ function removeCategory(k){const w=ui.wallet,b=balances()[w];if(k==='owner')throw Error('Категорію «Виплати собі» не можна видалити');if(state.currencyLedger?.events?.some(e=>((e.wallet===w||e.type==='uah_owner'&&w==='personal')&&(e.category===k||e.from===k||e.to===k||e.fromCategory===k||e.toCategory===k||e.allocations?.some(a=>a.id===k)))))throw Error('Конверт вже використаний у гривневих операціях чи обміні валют. Його видаляти не можна.');if([...planner().bills,...planner().debts].some(x=>x.wallet===w&&x.categoryId===k))throw Error('Конверт використовується в календарі платежів або боргах. Спочатку зміни ці записи.');if(b[k]!==0)throw Error('Не можна видалити конверт з коштами');const used=state.transactions.some(t=>(t.wallet===w&&([t.category,t.from,t.to].includes(k)||t.allocations?.some(a=>a.id===k)))||(t.type==='owner'&&w==='personal'&&t.allocations?.some(a=>a.id===k)));if(used)throw Error('Категорія вже є в журналі. Збережи її для історії.');if(!confirm(`Видалити категорію «${category(w,k).name}»?`))return;state.wallets[w].categories=getCats(w).filter(c=>c.id!==k);if(state.currencyLedger?.uahTargets?.[w])delete state.currencyLedger.uahTargets[w][k];save();render();toast('Категорію видалено')}
  function addCategory(){const cats=getCats(ui.wallet);if(cats.length>=45)throw Error('Досягнуто межі у 45 категорій');const name=document.getElementById('catName').value.trim(),icon=document.getElementById('catIcon').value.trim()||'📦',kind=document.getElementById('catKind').value;if(!name)throw Error('Вкажи назву');cats.push({id:'custom_'+id(),name,icon,pct:0,kind,target:0,due:0});save();closeModal();render();toast('Категорію додано · тепер задай їй частку у %')}
  function download(filename,text,type){const blob=new Blob([text],{type});const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
  function exportJson(){window.SOLVault.exportEncrypted().then(()=>toast('Зашифровану копію завантажено')).catch(e=>toast(e.message,true))}
- function exportCsv(){const rows=[['Дата','Гаманець','Тип','Категорія / рух','Коментар','Сума EUR']];for(const w of ['personal','business'])for(const t of state.transactions){const n=txSignedAmount(t,w);if(n===null)continue;rows.push([t.date,w,t.type,t.type==='expense'?category(w,t.category)?.name||'':desc(t,w),t.note||'',(n/100).toFixed(2)])}const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n');download(`SOL_Wallet_operations_${localDate()}.csv`,'\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV з історією операцій підготовлено')}
+ function exportCsv(){if(window.SOLCurrency?.exportAllCsv)return window.SOLCurrency.exportAllCsv(state);const rows=[['Дата','Гаманець','Тип','Категорія / рух','Коментар','Сума EUR']];for(const w of ['personal','business'])for(const t of state.transactions){const n=txSignedAmount(t,w);if(n===null)continue;rows.push([t.date,w,t.type,t.type==='expense'?category(w,t.category)?.name||'':desc(t,w),t.note||'',(n/100).toFixed(2)])}const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n');download(`SOL_Wallet_operations_${localDate()}.csv`,'\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV з історією операцій підготовлено')}
  async function importJson(file){if(!file)return;if(file.size>10_000_000)throw Error('Файл завеликий');
    const imported=JSON.parse(await file.text());
    if(imported?.format==='sol-wallet-vault'){
@@ -1379,7 +1382,7 @@
    state=imported;save();ui.page='overview';render();toast('Старі дані перенесено в захищений гаманець');
  }
  function reset(){if(!confirm('Це видалить усі доходи, витрати й змінені правила. Продовжити?'))return;if(!confirm('Остаточне підтвердження: повністю очистити SOL Wallet?'))return;state=clone(DEFAULT);save();ui.page='overview';ui.wallet='personal';render();toast('Застосунок очищено')}
- function undo(){const t=state.transactions.at(-1);if(!t)return;if(!confirm(`Скасувати останній запис за ${fmtDate(t.date)} на ${money(t.cents)}?`))return;state.transactions.pop();save();render();toast('Останню операцію скасовано')}
+ function undo(){const t=state.transactions.at(-1);if(!t)return;if(!confirm(`Скасувати останній запис за ${fmtDate(t.date)} на ${money(t.cents)}?`))return;const backup=clone(state);state.transactions.pop();try{validate(state)}catch(err){state=backup;throw Error("Скасування порушить валютний баланс. Спочатку перевір обмін EUR / UAH.")}save();render();toast('Останню операцію скасовано')}
  function action(name){if(name==='income')modalIncome();if(name==='quickIncome'){const cents=parseEuro(ui.preview);if(!Number.isSafeInteger(cents)||cents<1)throw Error('Введи правильну суму');modalIncome((cents/100).toFixed(2))}if(name==='expense')modalExpense();if(name==='move')modalMove();if(name==='owner')modalOwner();if(name==='addCategory')modalAddCategory();if(name==='saveRules')saveRules();if(name==='export')exportJson();if(name==='csv')exportCsv();if(name==='import')document.getElementById('importFile').click();if(name==='reset')reset();if(name==='undo')undo();if(name==='lock')window.SOLVault.lock();if(name==='cloud')window.SOLVault.showCloud();if(name==='icsWallet')exportICS(false);if(name==='icsAll')exportICS(true);if(name==='enableAlerts')enableAlerts();if(name==='disableAlerts')disableAlerts();if(name==='checkAlerts')window.SOLReminderNotifier?.check().then(ok=>toast(ok?'Повідомлення показано':'Немає нового повідомлення або доступ недоступний'));if(name==='clearCloud')clearCloudSetup();if(name==='syncNow')window.SOLVault.syncNow().then(result=>{if(result==='synced')toast('☁️ Хмара синхронізована');}).catch(e=>toast(e.message,true));if(name==='newBill')planBillModal();if(name==='newDebt')planDebtModal();}
  document.addEventListener('click',event=>{const el=event.target.closest('button');if(!el)return;try{if(el.dataset.recoveryIndex!==undefined){window.SOLVault.downloadRecovery(Number(el.dataset.recoveryIndex));return}if(el.dataset.page){ui.page=el.dataset.page;render();window.scrollTo(0,0);return}if(el.dataset.monthShift){const changed=P.monthShift(ui.plannerMonth,Number(el.dataset.monthShift));if(changed&&P.isMonth(changed)){ui.plannerMonth=changed;render()}return}if(el.dataset.recordPayment){recordPlanPayment(el.dataset.recordPayment,el.dataset.planId,el.dataset.period);return}if(el.dataset.linkPayment){linkPlanPayment(el.dataset.linkPayment,el.dataset.planId,el.dataset.period);return}if(el.dataset.editPlan){if(el.dataset.editPlan==='bill')planBillModal(el.dataset.planId);else planDebtModal(el.dataset.planId);return}if(el.dataset.togglePlan){togglePlan(el.dataset.togglePlan,el.dataset.planId);return}if(el.dataset.debtQuickpay){debtQuickPayment(el.dataset.debtQuickpay);return}if(el.dataset.wallet){ui.wallet=el.dataset.wallet;render();return}if(el.dataset.close){closeModal();return}if(el.dataset.action){action(el.dataset.action);return}if(el.dataset.removeCategory){removeCategory(el.dataset.removeCategory);return}}catch(e){toast(e.message||'Помилка',true)}});
  document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
@@ -1401,6 +1404,8 @@
    validate,
    loadSnapshot(data){validate(data);state=window.SOLPlanner.ensurePlanner(clone(data));unlocked=true;ui.page='overview';ui.wallet='personal';ui.plannerMonth=currentMonth();R.ensureSettings(state);render();window.SOLReminderNotifier?.onUnlock(state)},
    snapshot(){return clone(state)},
+   currencyPlan(w,cents,date){return plannedAllocation(cents,w,date)},
+   currencyEuroBalances(){return balances()},
    onLock(){window.SOLReminderNotifier?.onLock();state=clone(DEFAULT);unlocked=false;closeModal();document.getElementById('content').textContent=''},
    legacyData(){try{const x=localStorage.getItem(KEY);if(!x)return null;const parsed=JSON.parse(x);validate(parsed);return parsed}catch(e){return null}},
    removeLegacy(){localStorage.removeItem(KEY)},
@@ -1412,5 +1417,7 @@
 
 </script>
 <script src="./budget.js"></script>
+<script src="./currency-core.js"></script>
+<script src="./currency-ui.js"></script>
 </body>
 </html>
