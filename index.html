@@ -1,16 +1,17 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="uk">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1823">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-vW/2WOQHE0KnuLWyVYS7zsui3U9TkddzezHzL2BOTVM=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-XUrLYbxVu2a98A6GHtsroRFYp3yC/W8u48uBsOHbh1U='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-f4XiC5FchitrtvpFCsaS59SnviJXwv38zatVri2LV0M=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-XUrLYbxVu2a98A6GHtsroRFYp3yC/W8u48uBsOHbh1U='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
-  <title>SOL Wallet 6.0 — особистий бюджет і нагадування</title>
+  <title>SOL Wallet 7.0 — особистий бюджет і нагадування</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="stylesheet" href="./budget.css">
 
 
   <style>
@@ -329,7 +330,7 @@
 
 </script>
 <script>
-/* SOL Wallet 6.0: client-side encrypted vault + optional authenticated, revision-checked Supabase sync.
+/* SOL Wallet 7.0: client-side encrypted vault + optional authenticated, revision-checked Supabase sync.
    No plaintext balances are uploaded. No bank connections. */
 'use strict';
 (function(){
@@ -1410,5 +1411,6 @@
 })();
 
 </script>
+<script src="./budget.js"></script>
 </body>
 </html>
