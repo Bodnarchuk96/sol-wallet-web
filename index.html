@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1823">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-vW/2WOQHE0KnuLWyVYS7zsui3U9TkddzezHzL2BOTVM=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-XUrLYbxVu2a98A6GHtsroRFYp3yC/W8u48uBsOHbh1U='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
+  <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
+  <title>SOL Wallet 6.0 — особистий бюджет і нагадування</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+
+
+  <style>
+
+    :root{color-scheme:dark;--bg:#081621;--side:#0d1c29;--card:#102635;--card2:#142d3c;--line:#294353;--ink:#f1f8fa;--muted:#9ab1bb;--green:#80e5b4;--green2:#38c793;--blue:#8abef0;--amber:#f0c576;--red:#f69496;--radius:20px;--shadow:0 18px 50px #020a1355}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;color:var(--ink);background:radial-gradient(circle at 76% 0%,#15394a 0,transparent 39%),var(--bg);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    button:disabled{opacity:.4;cursor:not-allowed}
+    :focus-visible{outline:3px solid var(--green);outline-offset:3px}
+    .app{display:grid;grid-template-columns:247px minmax(0,1fr);min-height:100vh}
+    .side{position:sticky;top:0;height:100vh;background:#0a1825e8;border-right:1px solid #29404b;padding:31px 19px 22px;display:flex;flex-direction:column;gap:30px}
+    .brand{display:flex;align-items:center;gap:12px;padding:0 12px}
+    .brand-symbol{display:grid;place-items:center;width:42px;height:42px;color:#0b251e;background:linear-gradient(135deg,#aafdd4,#39c38e);border-radius:14px;box-shadow:0 6px 24px #3cd39f2f;font-weight:900;font-size:22px;transform:rotate(-6deg)}
+    .brand h1{margin:0;font-size:19px;letter-spacing:-.6px;line-height:1.1}
+    .brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:.8px;text-transform:uppercase;margin-top:5px}
+    .nav{display:flex;flex-direction:column;gap:7px}
+    .nav button{width:100%;background:transparent;border:1px solid transparent;color:#b6c8d0;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;text-align:left;font-weight:600}
+    .nav button .ico{width:20px;text-align:center;font-size:18px;filter:saturate(.6)}
+    .nav button.active{background:#22463e;color:var(--green);border-color:#37655b}
+    .nav button:hover:not(.active){background:#1b3040}
+    .side-footer{margin-top:auto;border:1px solid #284555;background:#122b39;border-radius:15px;padding:14px}
+    .side-footer .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#71dca7;margin-right:5px}
+    .side-footer strong{display:block;font-size:12px}
+    .side-footer p{font-size:12px;color:var(--muted);margin:7px 0 0}
+    .main{width:100%;max-width:1540px;margin:auto;padding:32px clamp(18px,4vw,55px) 50px;min-width:0}
+    .topbar,.topbar-left,.topbar-right{display:flex;align-items:center;gap:16px}
+    .topbar{justify-content:space-between;flex-wrap:wrap;margin-bottom:26px}
+    .eyebrow{font-size:11px;letter-spacing:1.9px;text-transform:uppercase;color:#91e5c2;font-weight:800}
+    .topbar h2{margin:5px 0 0;font-size:clamp(24px,2.7vw,35px);letter-spacing:-1.1px;line-height:1.15}
+    .topbar .sub{color:var(--muted);margin:7px 0 0;font-size:13px}
+    .wallet-toggle{display:flex;gap:3px;border-radius:14px;background:#0e2230;border:1px solid #355062;padding:4px}
+    .wallet-toggle button{border:0;color:#adbec8;border-radius:10px;background:transparent;padding:9px 13px;font-weight:700;font-size:13px;white-space:nowrap}
+    .wallet-toggle button.active{background:#305c52;color:#dfffee;box-shadow:0 2px 12px #030d1533}
+    .intro{margin-bottom:19px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+    .intro h3{margin:0;font-size:18px;letter-spacing:-.4px}
+    .intro p{margin:2px 0 0;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:9px;flex-wrap:wrap}
+    .btn{border-radius:12px;border:1px solid #345365;background:#182f3d;color:#e1eef2;padding:10px 14px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;transition:background .2s,transform .2s;min-height:42px}
+    .btn:hover{transform:translateY(-1px);background:#234358}
+    .btn.primary{background:#80e5b4;border-color:#80e5b4;color:#092619}
+    .btn.primary:hover{background:#b4f9d5}
+    .btn.soft{background:#17372f;border-color:#3a6454;color:#b6ffdc}
+    .btn.warn{background:#442d34;border-color:#774550;color:#ffb9b5}
+    .btn.small{padding:7px 11px;min-height:35px;font-size:12px}
+    .btn.ghost{background:transparent;border-color:#375260;color:#b8c9d0}
+    .summary{display:grid;grid-template-columns:1.55fr 1fr 1fr;gap:14px;margin-bottom:23px}
+    .hero{min-height:202px;background:linear-gradient(115deg,#235449,#143845 64%,#112939);border:1px solid #477269;border-radius:24px;padding:24px 26px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .hero:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;border:48px solid #c0ffe70e;right:-125px;top:-140px;pointer-events:none}
+    .hero .label{font-size:13px;color:#c1e3dc;font-weight:600;position:relative;z-index:1}
+    .hero .amount{font-size:clamp(28px,3.8vw,47px);line-height:1.18;letter-spacing:-1.8px;font-weight:800;margin:23px 0 14px;position:relative;z-index:1;white-space:nowrap}
+    .hero .extra{font-size:12px;color:#b8d8d3;position:relative;z-index:1}
+    .metric{background:linear-gradient(180deg,#142e3d,#102735);border:1px solid var(--line);border-radius:22px;padding:24px 20px;min-height:202px;display:flex;flex-direction:column;justify-content:space-between}
+    .metric .label{color:var(--muted);font-weight:650;font-size:12px}
+    .metric .amount{font-size:clamp(23px,2.6vw,34px);font-weight:800;letter-spacing:-1px;white-space:nowrap}
+    .metric .hint{font-size:12px;color:var(--muted)}
+    .metric.green .amount{color:var(--green)}
+    .metric.amber .amount{color:var(--amber)}
+    .section-grid{display:grid;grid-template-columns:1.3fr .85fr;gap:17px;align-items:start}
+    .panel{background:linear-gradient(180deg,#112838,#102432);border:1px solid var(--line);border-radius:21px;overflow:hidden;box-shadow:0 7px 26px #00000017}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:21px 22px 12px}
+    .panel-head h3{font-size:17px;letter-spacing:-.4px;margin:0}
+    .panel-head p{font-size:12px;color:var(--muted);margin:4px 0 0}
+    .panel-body{padding:12px 19px 20px}
+    .envelope-list{display:grid;gap:9px}
+    .envelope{background:#172f3e;border:1px solid #284657;border-radius:15px;padding:13px;display:grid;grid-template-columns:41px minmax(0,1fr) auto;gap:11px;align-items:center}
+    .envelope .symbol{font-size:21px;display:grid;place-items:center;background:#264455;width:41px;height:41px;border-radius:13px}
+    .envelope .ename{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .envelope .einfo{font-size:11px;color:var(--muted);margin-top:1px;display:flex;gap:7px;flex-wrap:wrap}
+    .envelope .ebalance{font-size:15px;font-weight:800;white-space:nowrap;text-align:right}
+    .envelope .smalltag{font-size:10px;background:#204f45;color:#a9eccf;border-radius:6px;padding:2px 5px}
+    .envelope.flexbox .smalltag{background:#384d63;color:#c3daf0}
+    .track{height:5px;border-radius:10px;background:#0b1e2a;overflow:hidden;margin-top:7px}
+    .track span{height:100%;background:linear-gradient(90deg,#50ba93,#8be9b9);border-radius:10px;display:block}
+    .envelope .target{font-size:10px;color:#a9bfc7;margin-top:4px}
+    .preview-panel{padding-bottom:5px}
+    .preview-amount-wrap{background:#182f3d;border:1px solid #39566b;border-radius:15px;margin:2px 20px 15px;padding:14px 15px;display:flex;align-items:center;gap:10px}
+    .preview-amount-wrap .currency{font-size:20px;font-weight:700;color:var(--muted)}
+    .preview-amount-wrap input{min-width:0;width:100%;border:0;outline:0;background:transparent;color:#f1fdf6;font-size:32px;font-weight:850;letter-spacing:-1px}
+    .preview-amount-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+    .preview-list{padding:0 23px 4px;display:grid;gap:10px}
+    .preview-line{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .preview-line .name{font-size:12px;color:#cbdae1}
+    .preview-line .name b{font-weight:500;color:#758f9f;margin-left:5px}
+    .preview-line .money{font-size:13px;font-weight:750}
+    .preview-bars{width:100%;display:flex;height:9px;gap:3px;border-radius:12px;overflow:hidden;margin:8px 0 13px;background:#0e2030}
+    .preview-bars span{display:block;min-width:1px}
+    .preview-footer{padding:14px 21px 20px;border-top:1px solid var(--line);margin-top:11px}
+    .preview-footer p{font-size:11px;color:var(--muted);margin:0 0 13px;line-height:1.55}
+    .preview-footer .btn{width:100%}
+    .notice{border-radius:13px;padding:12px 15px;border:1px solid #5a5139;background:#342e234f;color:#f1d5a2;font-size:12px;display:flex;gap:10px;align-items:start;margin-bottom:16px}
+    .notice.neutral{border-color:#35596a;background:#143142;color:#bfdde9}
+    .notice strong{color:#fff1d6}
+    .tabs-inline{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+    .tabs-inline button{border:1px solid #365263;background:#122939;border-radius:12px;color:var(--muted);font-weight:700;padding:9px 13px}
+    .tabs-inline button.active{background:#235143;border-color:#4e9076;color:var(--green)}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{text-align:left;padding:13px 12px;color:#8eabb9;font-size:11px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid #325066}
+    .data-table td{padding:13px 12px;border-bottom:1px solid #27404e;font-size:13px}
+    .data-table tr:last-child td{border-bottom:0}
+    .data-table td.amountplus{color:#92e7bc;font-weight:800;text-align:right;white-space:nowrap}
+    .data-table td.amountminus{color:#f1a5a1;font-weight:800;text-align:right;white-space:nowrap}
+    .data-table td.amountneutral{color:#abcce4;font-weight:800;text-align:right;white-space:nowrap}
+    .table-wrap{overflow-x:auto;padding:3px 10px 13px}
+    .empty{text-align:center;padding:36px 16px;color:var(--muted);font-size:13px}
+    .empty .big{font-size:33px;margin-bottom:12px}
+    .empty strong{display:block;color:#e3eff0;font-size:15px;margin-bottom:6px}
+    .activity-mini{padding:0 14px 15px}
+    .activity-item{display:flex;align-items:center;gap:11px;padding:12px 7px;border-bottom:1px solid #2a4352}
+    .activity-item:last-child{border:0}
+    .activity-item .symbol{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:10px;background:#213d4b}
+    .activity-item .mid{flex:1;min-width:0}
+    .activity-item .mid strong{font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .activity-item .mid small{font-size:11px;color:var(--muted)}
+    .activity-item .money{font-size:13px;font-weight:800;white-space:nowrap}
+    .activity-item .money.in{color:var(--green)}
+    .activity-item .money.out{color:var(--red)}
+    .activity-item .money.other{color:var(--blue)}
+    .settings-info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+    .settings-info .mini{border:1px solid #365568;background:#193040;border-radius:14px;padding:14px}
+    .settings-info b{font-size:18px;display:block;margin-bottom:4px}
+    .settings-info small{color:var(--muted);font-size:11px}
+    .edit-rows{display:grid;gap:10px;padding:13px 18px 19px}
+    .edit-row{border:1px solid #314b5b;border-radius:15px;background:#162e3c;padding:12px;display:grid;grid-template-columns:38px minmax(0,1.5fr) minmax(65px,.55fr) minmax(85px,.8fr) minmax(93px,.8fr) minmax(70px,.55fr) 40px;gap:8px;align-items:end}
+    .edit-icon{display:grid;place-items:center;height:40px;font-size:22px;background:#264555;border-radius:11px}
+    label.fieldlabel{display:block;color:#a8c1ca;font-size:11px;font-weight:700;margin-bottom:5px}
+    input.field,select.field{display:block;border-radius:10px;border:1px solid #446071;background:#0b2030;color:#f2fbfd;padding:10px 11px;min-width:0;width:100%;outline:none;height:41px}
+    input.field:focus,select.field:focus{border-color:#88ddb7;box-shadow:0 0 0 2px #66cba03f}
+    input.field::placeholder{color:#7993a1}
+    .edit-row .remove{border:1px solid #684454;background:#3b2a33;color:#ffb1b1;border-radius:10px;height:40px;width:40px;display:grid;place-items:center;font-size:17px}
+    .edit-actions{padding:0 20px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .ratio{color:var(--green);font-size:12px;font-weight:800;margin-right:auto}
+    .ratio.error{color:var(--red)}
+    .report-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 16px}
+    .report-stat{background:#172e3d;border:1px solid #345365;border-radius:15px;padding:15px}
+    .report-stat small{color:var(--muted);font-size:11px}
+    .report-stat strong{display:block;font-size:20px;margin-top:10px;white-space:nowrap}
+    .report-label{font-size:13px;font-weight:800;margin:20px 0 7px}
+    .bar-row{display:grid;grid-template-columns:150px 1fr 110px;gap:11px;align-items:center;margin:12px 0}
+    .bar-row .t{font-size:12px;color:#bed2d8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bar-row .v{text-align:right;font-size:12px;font-weight:750}
+    .bar-row .bar{height:9px;background:#0c1f2d;border-radius:20px;overflow:hidden}
+    .bar-row .bar span{display:block;height:100%;background:#7ddfb3;border-radius:20px}
+    .security-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .info-card{border:1px solid #345365;background:#152f3d;border-radius:14px;padding:17px}
+    .info-card h4{margin:0 0 7px;font-size:14px}
+    .info-card p{color:var(--muted);font-size:12px;margin:0 0 13px}
+    .info-card .actions{gap:8px}
+    .modal-backdrop{position:fixed;z-index:50;inset:0;background:#020b14d9;display:none;place-items:center;padding:18px;backdrop-filter:blur(6px);overflow:auto}
+    .modal-backdrop.open{display:grid}
+    .modal{background:#132b3a;border:1px solid #4a6a79;border-radius:23px;width:min(100%,560px);max-height:min(94vh,900px);overflow:auto;box-shadow:0 30px 90px #0009}
+    .modal-header{padding:22px 23px 11px;display:flex;justify-content:space-between;align-items:start;gap:15px}
+    .modal-header h3{margin:0;font-size:21px;letter-spacing:-.5px}
+    .modal-header p{font-size:12px;color:var(--muted);margin:5px 0}
+    .close{border:1px solid #486173;background:#203c4a;color:#cfe2e7;border-radius:10px;min-width:35px;height:35px;font-size:21px}
+    .modal-content{padding:10px 23px 23px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-block{margin-bottom:13px}
+    .form-block .fieldlabel{font-size:12px;margin-bottom:6px}
+    .form-block small{color:var(--muted)}
+    .form-block.full{grid-column:1/-1}
+    .modal .field{height:46px}
+    .allocation-review{max-height:255px;overflow:auto;border:1px solid #345566;background:#0d2330;border-radius:14px;padding:10px 15px;margin:17px 0}
+    .allocation-review .preview-line{padding:6px 0;border-bottom:1px solid #1d3a4c}
+    .allocation-review .preview-line:last-child{border:0}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:17px;flex-wrap:wrap}
+    .toast{position:fixed;z-index:100;left:50%;bottom:23px;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:#e0faec;border-radius:12px;color:#073326;padding:13px 19px;font-size:13px;font-weight:700;box-shadow:0 12px 60px #0008;max-width:min(90vw,700px);text-align:center;transition:.18s}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast.error{background:#f9ced0;color:#4f1e24}
+    .bottom-note{font-size:11px;color:#7fa0b0;text-align:center;margin-top:22px}
+    .mobile-nav{display:none}
+    .muted{color:var(--muted)}
+    .mono{font-variant-numeric:tabular-nums}
+    .iconchip{font-size:18px;margin-right:7px}
+    @media(max-width:1180px){.summary{grid-template-columns:1fr 1fr}.hero{grid-column:1/-1;min-height:175px}.section-grid{grid-template-columns:1fr 1fr}.edit-row{grid-template-columns:36px 1fr 1fr 1fr;}.edit-row .edit-icon{grid-row:1/3;align-self:center}.edit-row .remove{align-self:end}}
+    @media(max-width:940px){.app{grid-template-columns:1fr}.side{display:none}.main{padding:23px 17px 105px}.mobile-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;z-index:30;background:#0a1c29f5;border-top:1px solid #375061;padding:8px 5px max(8px,env(safe-area-inset-bottom));backdrop-filter:blur(12px)}.mobile-nav button{border:0;background:transparent;color:#99b3bd;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;font-weight:700;min-height:51px}.mobile-nav button .mi{font-size:20px}.mobile-nav button.active{color:var(--green)}.section-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.topbar-right{width:100%}.wallet-toggle{width:100%}.wallet-toggle button{flex:1}.topbar h2{font-size:28px}.summary{gap:10px}.hero{padding:21px;min-height:160px}.hero .amount{font-size:36px;margin:20px 0 8px}.metric{padding:17px;min-height:135px}.metric .amount{font-size:25px}.section-grid{display:flex;flex-direction:column}.section-grid>section{order:2;width:100%}.section-grid>div{order:1;width:100%}.intro{align-items:start}.intro .actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.intro .actions .btn{padding:9px 5px;font-size:12px}.panel-head{padding:19px 17px 11px}.envelope{grid-template-columns:39px minmax(0,1fr) auto;padding:10px;gap:9px}.envelope .ebalance{font-size:13px}.report-stats{grid-template-columns:repeat(2,1fr)}.settings-info{grid-template-columns:1fr 1fr}.edit-row{grid-template-columns:1fr 1fr;gap:9px;padding:14px}.edit-row>.edit-icon{grid-column:1;grid-row:1;justify-self:start;width:41px}.edit-row>div:nth-child(2){grid-column:1/3;grid-row:2}.edit-row>div:nth-child(3){grid-column:1;grid-row:3}.edit-row>div:nth-child(4){grid-column:2;grid-row:3}.edit-row>div:nth-child(5){grid-column:1;grid-row:4}.edit-row>div:nth-child(6){grid-column:2;grid-row:4}.edit-row>.remove{grid-column:2;grid-row:1;justify-self:end}.bar-row{grid-template-columns:110px 1fr 90px}.security-layout{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.modal-content{padding:10px 17px 19px}.modal-header{padding:20px 17px 7px}}
+    @media(max-width:380px){.summary{grid-template-columns:1fr}.hero{grid-column:auto}.metric{min-height:110px}.hero .amount{font-size:32px}.edit-row{grid-template-columns:1fr 1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+  
+
+/* SOL Wallet v2 security shell */
+.security-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pill-status{padding:8px 11px;border-radius:10px;color:#c6e5d6;background:#173c34;border:1px solid #3e6a5a;font-size:11px;font-weight:750;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.locked{display:none}.vault-gate{position:fixed;z-index:200;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 75% 0,#1d4e49 0,transparent 44%),#081621;padding:20px;overflow-y:auto}.vault-gate.hidden{display:none}.gate-card{width:min(100%,510px);background:linear-gradient(160deg,#122e3b,#0c202d);padding:30px;border:1px solid #335b5c;border-radius:27px;box-shadow:0 26px 80px #0009}.gate-symbol{display:grid;place-items:center;background:linear-gradient(135deg,#b1fdda,#48c895);color:#08291d;width:59px;height:59px;border-radius:18px;font-size:31px;font-weight:950;transform:rotate(-5deg);margin-bottom:25px}.gate-card h1{font-size:clamp(31px,6vw,43px);margin:10px 0 9px;line-height:1.14;letter-spacing:-1.6px}.gate-card h1 span{color:#8ee9b9}.gate-lead{color:#b7d1d8;font-size:14px;margin:0 0 23px}.gate-panel{border:1px solid #335364;background:#142e3c;padding:20px;border-radius:16px;margin:14px 0}.gate-panel h2{font-size:17px;margin:0 0 6px}.gate-panel p{font-size:12px;color:#acc3ca;margin:0 0 14px}.gate-panel .fieldlabel{color:#cce6eb;display:block;font-size:12px;margin:10px 0 6px}.gate-panel .field{width:100%;height:44px;padding:10px;border-radius:10px}.gate-panel .btn{width:100%;margin-top:10px}.gate-panel .btn.secondary{background:#1d4049}.gate-panel .helper{margin-top:10px;font-size:11px;color:#a2bac6}.gate-warning{color:#f4c582;font-size:12px}.gate-message{margin-top:12px;min-height:20px;color:#9bd8b7;font-size:12px}.gate-message.error{color:#ffaaa5}.gate-foot{text-align:center;font-size:11px;color:#8bafb8;margin-top:20px}.gate-actions{display:grid;gap:8px}.gate-divider{margin:18px 0;border-top:1px solid #315162}.gate-option{font-size:12px;color:#b7cbd3}.gate-subtitle{font-size:12px;color:#adcad4}.gate-badge{background:#204438;color:#adf5ce;border-radius:8px;padding:4px 8px;font-weight:750;font-size:11px}.security-note{border:1px solid #416453;background:#142f2a;padding:12px;border-radius:12px;font-size:12px;color:#bde7d5}.sync-alert{margin:10px 0;padding:10px;border-radius:12px;border:1px solid #8a6742;background:#382d25;color:#f5d5a9;font-size:12px}
+@media(max-width:700px){.security-controls{justify-content:space-between;width:100%}.topbar-right{flex-direction:column;align-items:stretch;gap:9px}.gate-card{padding:24px 17px}.gate-panel{padding:15px}}
+/* V3 — payment calendar, debt control and cash-flow forecast */
+.good-text{color:var(--green)!important}.amber-text,.warn-text{color:var(--amber)!important}.danger-text{color:var(--red)!important}
+.plan-quick{margin:0 0 20px;padding:20px 22px;background:linear-gradient(125deg,#163832,#122b3e)}
+.plan-quick-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.plan-quick h3{font-size:18px;margin:5px 0 3px}.plan-quick p{font-size:12px;color:var(--muted);margin:0}
+.plan-quick-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:17px}
+.plan-quick-stats>div{border:1px solid #345766;border-radius:13px;padding:12px 14px;background:#0e2734}
+.plan-quick-stats small{display:block;font-size:11px;color:#bad0d6;margin-bottom:5px}.plan-quick-stats strong{display:block;font-size:clamp(19px,2vw,25px);white-space:nowrap;letter-spacing:-.5px}
+.planner-calendar-head{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:19px 20px 10px}
+.planner-calendar-head h3{margin:0;font-size:20px;text-transform:capitalize}.planner-calendar-nav{display:flex;gap:8px;align-items:center}
+.planner-calendar-nav .field{height:38px;max-width:164px;padding:8px 9px;font-size:13px}
+.weekday-grid,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.weekday-grid{padding:8px 12px;border-top:1px solid var(--line)}
+.weekday-grid div{text-align:center;font-size:11px;color:var(--muted);font-weight:800}
+.calendar-grid{padding:0 12px 16px;gap:6px;grid-auto-rows:minmax(76px,auto)}
+.day-cell{background:#0e2533;border:1px solid #294957;border-radius:10px;padding:8px 8px 6px;min-width:0;position:relative;overflow:hidden}
+.day-cell.blank{background:transparent;border-color:transparent}.day-cell.today{border-color:var(--green);box-shadow:inset 0 0 0 1px #6dcda644}.day-cell.has-due{background:#143343}
+.date-num{display:block;color:#bad2da;font-size:13px;font-weight:800}.today .date-num{color:var(--green)}
+.day-count{font-size:10px;line-height:1.2;color:#c8ebdc;display:block;margin-top:6px}.day-dot{width:5px;height:5px;display:inline-block;background:#90c9dd;border-radius:4px;margin-right:3px}
+.day-dot.overdue{background:#ff949b}.day-dot.paid,.day-dot.settled{background:#8feab6}.day-dot.today,.day-dot.soon{background:#ffcf7b}
+.due-list{display:grid;gap:10px}.due-row{display:grid;grid-template-columns:43px minmax(0,1fr) auto;gap:13px;align-items:center;padding:14px;border:1px solid #315360;border-radius:13px;background:#132f3c}
+.due-icon{width:41px;height:41px;background:#204553;display:grid;place-items:center;border-radius:12px;font-size:20px}
+.due-title{font-weight:850;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.due-main p{color:#bad1d9;font-size:12px;margin:4px 0}.due-main small{color:var(--muted);font-size:11px}
+.due-end{text-align:right;min-width:120px}.due-end strong{font-size:16px}.due-actions{display:flex;gap:6px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap}.due-actions .btn{font-size:11px;padding:5px 9px;min-height:31px}
+.status-chip{display:inline-flex;white-space:nowrap;align-items:center;border-radius:30px;padding:3px 8px;font-size:10px;font-weight:800;background:#234658;color:#c4e8e9}
+.status-chip.paid,.status-chip.settled{background:#27513d;color:#acffd2}.status-chip.overdue{background:#583138;color:#ffbbbc}.status-chip.today,.status-chip.soon{background:#4b3c29;color:#fce0a0}.status-chip.partial{background:#38405f;color:#d5d8ff}
+.plan-management{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.plan-management:last-child{border-bottom:0}.plan-management strong{font-size:14px}.plan-management p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.debt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.debt-card{padding:18px;background:linear-gradient(145deg,#15323f,#112735);border:1px solid var(--line);border-radius:19px}
+.debt-header{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:14px}
+.debt-amount{font-size:30px;font-weight:850;margin-top:19px;letter-spacing:-.8px}.debt-secondary{color:var(--muted);font-size:12px;margin:0 0 15px}
+.debt-progress{display:flex;justify-content:space-between;font-size:11px;color:#acccd3;margin:6px 0}.debt-details{font-size:12px;line-height:1.5;color:#adccd5;margin:12px 0}
+.debt-card .actions{margin-top:15px}.debt-card .track{height:8px}.debt-card .track span{background:var(--green)}
+.forecast-feature{display:grid;grid-template-columns:1.15fr .85fr;gap:15px;margin:17px 0}.forecast-hero{padding:24px;background:linear-gradient(130deg,#205249,#153843);border:1px solid #508377;border-radius:20px}
+.forecast-hero small{color:#c0e4d8;font-weight:700}.forecast-hero strong{font-size:clamp(28px,3.3vw,43px);display:block;margin:15px 0 10px;letter-spacing:-1px}.forecast-hero p{color:#c0d6d8;font-size:12px;margin:0}
+.forecast-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.forecast-tiles>div{background:#163242;border:1px solid #315468;border-radius:14px;padding:14px}
+.forecast-tiles small{display:block;color:#acc6ce;font-size:11px;margin-bottom:9px}.forecast-tiles b{display:block;font-size:clamp(15px,1.6vw,21px);white-space:nowrap}
+.forecast-line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.forecast-line:last-child{border:0}.forecast-line b{font-size:13px}.forecast-line small{display:block;font-size:11px;color:var(--muted);margin-top:3px}.forecast-line strong{text-align:right;font-size:13px;white-space:nowrap}
+.more-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.more-link{border:1px solid #325262;background:#17313f;padding:20px;border-radius:16px;display:grid;grid-template-columns:32px 1fr auto;gap:5px 10px;text-align:left;color:var(--ink);align-items:center}
+.more-link>span{grid-row:1/3;font-size:22px}.more-link strong{font-size:14px}.more-link small{grid-column:2;color:var(--muted);font-size:11px}.more-link>b{grid-column:3;grid-row:1/3;font-size:18px;color:var(--green)}
+[hidden]{display:none!important}
+@media(max-width:950px){.forecast-feature{grid-template-columns:1fr}.debt-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.plan-quick{padding:17px}.plan-quick-stats{grid-template-columns:1fr 1fr}.plan-quick-stats>div:first-child{grid-column:1/-1}.calendar-grid{gap:3px;padding:0 7px 10px;grid-auto-rows:minmax(62px,auto)}.weekday-grid{padding:5px 7px}.day-cell{padding:5px 4px;border-radius:6px}.date-num{font-size:11px}.day-count{font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.planner-calendar-head{padding:15px 13px 10px}.planner-calendar-head h3{font-size:17px}.due-row{grid-template-columns:32px 1fr;gap:10px;padding:12px}.due-icon{width:32px;height:32px;font-size:16px}.due-end{grid-column:2;text-align:left}.due-actions{justify-content:flex-start}.debt-grid{grid-template-columns:1fr}.debt-amount{font-size:28px}.forecast-tiles{grid-template-columns:1fr 1fr}.forecast-tiles>div{padding:10px}.forecast-tiles b{font-size:15px}.more-grid{grid-template-columns:1fr}.plan-management{flex-wrap:wrap}.plan-management .actions{width:100%}}
+@media(max-width:380px){.plan-quick-stats{grid-template-columns:1fr}.plan-quick-stats>div:first-child{grid-column:auto}.forecast-tiles{grid-template-columns:1fr 1fr}.forecast-tiles b{font-size:13px}}
+
+/* Version 4: payment notifications, privacy and install controls */
+.reminder-highlight{margin:0 0 16px;border-color:#6c6240;background:linear-gradient(110deg,#263c42,#172f3c)}
+.reminder-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.reminder-head h3{margin:7px 0;font-size:17px}
+.reminder-head p{color:#b5c9d2;font-size:12px;margin:0}
+.reminder-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+.reminder-settings-grid .panel{height:100%}
+.reminder-settings-grid h3{margin:4px 0 12px;font-size:18px}
+.reminder-settings-grid h4{margin:14px 0 8px;font-size:15px}
+.reminder-settings-grid .muted{font-size:12px;line-height:1.65}
+.reminder-settings-grid .divider-soft{height:1px;background:#315064;margin:18px 0 12px}
+.reminder-settings-grid .calendar-detail-toggle{display:flex;align-items:center;gap:8px;margin:15px 0;color:#d5e8ed;font-size:12px}
+.reminder-settings-grid .calendar-detail-toggle input{accent-color:#80dab0}
+.reminder-settings-grid .due-row{margin-bottom:6px}
+@media(max-width:820px){.reminder-settings-grid{grid-template-columns:1fr}.reminder-head{flex-direction:column;align-items:start}}
+@media(max-width:480px){.reminder-highlight .panel-body{padding:14px}.reminder-settings-grid .panel-body{padding:15px}}
+
+/* Secure recovery archive controls */
+.recovery-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(127,156,168,.24)}
+.recovery-row span{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.recovery-row small{color:#9ab4bc;font-size:11px}
+@media(max-width:420px){.recovery-row{align-items:stretch;flex-direction:column}.recovery-row .btn{align-self:flex-start}}
+
+</style>
+</head>
+<body>
+<div id="vaultGate" class="vault-gate" role="dialog" aria-modal="true" aria-label="Захищений доступ до SOL Wallet">
+  <section class="gate-card">
+    <div class="gate-symbol">S</div>
+    <div class="eyebrow">ПРИВАТНИЙ ФІНАНСОВИЙ ПРОСТІР</div>
+    <h1>SOL Wallet <span>6.0</span></h1>
+    <p class="gate-lead">Кожне євро на своєму місці. А доступ до бюджету — тільки з твоїм ключем.</p>
+    <div id="vaultGateContent"></div>
+    <div class="gate-message" id="vaultGateMessage" role="status" aria-live="polite"></div>
+    <div class="gate-foot">🔐 AES-256-GCM · Без банківських реквізитів · EUR</div>
+  </section>
+</div>
+<div class="app locked">
+  <aside class="side">
+    <div class="brand"><div class="brand-symbol">S</div><div><h1>SOL Wallet</h1><small>гроші на свої місця</small></div></div>
+    <nav class="nav" aria-label="Розділи застосунку">
+      <button data-page="overview" class="active"><span class="ico">◫</span> Огляд</button>
+      <button data-page="calendar"><span class="ico">▦</span> Календар платежів</button>
+      <button data-page="reminders"><span class="ico">🔔</span> Нагадування</button>
+      <button data-page="debts"><span class="ico">▥</span> Борги</button>
+      <button data-page="forecast"><span class="ico">↗</span> Прогноз</button>
+      <button data-page="history"><span class="ico">≡</span> Операції</button>
+      <button data-page="rules"><span class="ico">◈</span> Правила розподілу</button>
+      <button data-page="reports"><span class="ico">▤</span> Звіти</button>
+      <button data-page="backup"><span class="ico">⚙</span> Дані та безпека</button>
+    </nav>
+    <div class="side-footer"><strong><span class="dot"></span> Захищений режим</strong><p>Записи шифруються на пристрої. Хмара працює лише після налаштування приватної бази.</p></div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <div><div class="eyebrow">ТВОЯ ФІНАНСОВА СИСТЕМА</div><h2 id="pageTitle">Мої гроші — мій план</h2><p class="sub" id="pageSubtitle">Побач, де кожне євро, перш ніж його витратити.</p></div>
+      <div class="topbar-right"><div class="security-controls"><span id="vaultStatus" class="pill-status">🔒 Зачинено</span><button class="btn small ghost" id="installApp" type="button" hidden>📲 Встановити</button><button class="btn small ghost" id="lockWallet" type="button">Заблокувати</button></div><div class="wallet-toggle" role="group" aria-label="Вибрати гаманець"><button data-wallet="personal" class="active">🏠 Сім'я</button><button data-wallet="business">💼 Бізнес BMH</button></div></div>
+    </div>
+    <div id="content"></div>
+    <div class="bottom-note">SOL Wallet v6.0 · Шифрований фінансовий планувальник, не банк і не податкова консультація · Усі суми в EUR</div>
+  </main>
+</div>
+<nav class="mobile-nav" aria-label="Мобільна навігація">
+  <button data-page="overview" class="active"><span class="mi">◫</span>Огляд</button>
+  <button data-page="calendar"><span class="mi">▦</span>Календар</button>
+  <button data-page="debts"><span class="mi">▥</span>Борги</button>
+  <button data-page="forecast"><span class="mi">↗</span>Прогноз</button>
+  <button data-page="more"><span class="mi">☷</span>Ще</button>
+</nav>
+<div id="modalBackdrop" class="modal-backdrop" role="presentation"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><h3 id="modalTitle"></h3><p id="modalSubtitle"></p></div><button type="button" class="close" data-close="1" aria-label="Закрити">×</button></div><div id="modalContent" class="modal-content"></div></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>
+// SOL Wallet v4: only public API settings are stored here. No secret/service-role keys.
+// Local runtime setup enables non-technical users to configure a dedicated Supabase project.
+(function(){
+  const defaults={supabaseUrl:'',publishableKey:''};
+  try{
+    const raw=localStorage.getItem('SOL_WALLET_V4_CLOUD_SETUP');
+    const obj=raw?JSON.parse(raw):null;
+    if(obj&&/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(obj.supabaseUrl||'')&&typeof obj.publishableKey==='string'&&obj.publishableKey.length<4096){
+      window.SOL_CONFIG={supabaseUrl:obj.supabaseUrl,publishableKey:obj.publishableKey};return;
+    }
+  }catch(_){/* first open or restrictive browser */}
+  window.SOL_CONFIG=defaults;
+})();
+
+</script>
+<script>
+/* SOL Wallet 6.0: client-side encrypted vault + optional authenticated, revision-checked Supabase sync.
+   No plaintext balances are uploaded. No bank connections. */
+'use strict';
+(function(){
+  const STORAGE='SOL_WALLET_V2_ENCRYPTED';
+  const AUTH_STORAGE='SOL_WALLET_V2_AUTH';
+  const LAST_SERVER='SOL_WALLET_V2_CLOUD_REV';
+  const RECOVERY_STORAGE='SOL_WALLET_V6_ENCRYPTED_RECOVERY';
+  const MAX_RECOVERY=5;
+  const ROUNDS=310000;
+  const te=new TextEncoder(),td=new TextDecoder();
+  let wallet=null,key=null,salt=null,iterations=ROUNDS,sealed=null,active=false;
+  let gateMode='start', pendingRemote=null,remoteRevision=null,cloudEnabled=false,account=null,auth=null;
+  let queue=Promise.resolve(),syncBlocked=false,syncState='local',inFlight=false;
+  let idleTimer=null;
+  const config=window.SOL_CONFIG||{};
+  const baseUrl=typeof config.supabaseUrl==='string'?config.supabaseUrl.trim().replace(/\/+$/,''):'';
+  const publishable=typeof config.publishableKey==='string'?config.publishableKey.trim():'';
+  const hasCloud=/^https:\/\/[a-zA-Z0-9.-]+$/.test(baseUrl)&&/^https:\/\//.test(baseUrl)
+     &&((publishable.startsWith('sb_publishable_')&&publishable.length>30) || (()=>{try{const parts=publishable.split('.');if(parts.length!==3)return false;const claims=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));return claims.role==='anon'}catch(_){return false}})());
+  function byId(s){return document.getElementById(s)}
+  function setMessage(message,error=false){const n=byId('vaultGateMessage');n.textContent=message||'';n.classList.toggle('error',error)}
+  function htmlEscape(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function bytesToBase64(bytes){let raw='';for(let i=0;i<bytes.length;i+=8192){raw+=String.fromCharCode(...bytes.subarray(i,i+8192))}return btoa(raw)}
+  function base64ToBytes(text){if(typeof text!=='string'||!text||text.length>20000000)throw Error('Некоректна захищена копія');return Uint8Array.from(atob(text),c=>c.charCodeAt(0))}
+  function random(n){return crypto.getRandomValues(new Uint8Array(n))}
+  function supportsCrypto(){return !!(globalThis.crypto?.subtle&&globalThis.crypto?.getRandomValues)}
+  function checkPayload(blob){
+    if(!blob||blob.format!=='sol-wallet-vault'||blob.version!==2||blob.cipher!=='AES-256-GCM'||blob.kdf!=='PBKDF2-SHA256'||blob.iterations<250000||blob.iterations>1000000)throw Error('Цей файл не є підтримуваною зашифрованою копією SOL Wallet v2');
+    const s=base64ToBytes(blob.salt),iv=base64ToBytes(blob.iv),ct=base64ToBytes(blob.ciphertext);
+    if(s.length!==16||iv.length!==12||ct.length<16||ct.length>10000000)throw Error('Помилка формату шифрованого файлу');
+    return {s,iv,ct};
+  }
+  async function derive(password,s,rounds){
+    if(!supportsCrypto())throw Error('Цей браузер не підтримує потрібне захищене шифрування. Відкрийте застосунок у сучасному Chrome / Safari / Firefox через HTTPS.');
+    const raw=await crypto.subtle.importKey('raw',te.encode(password),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:s,iterations:rounds,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  }
+  async function seal(snapshot,cryptoKey,s,rounds){
+    const iv=random(12);
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:te.encode('SOL-WALLET-v2')},cryptoKey,te.encode(JSON.stringify(snapshot)));
+    return {format:'sol-wallet-vault',version:2,cipher:'AES-256-GCM',kdf:'PBKDF2-SHA256',iterations:rounds,salt:bytesToBase64(s),iv:bytesToBase64(iv),ciphertext:bytesToBase64(new Uint8Array(ct))};
+  }
+  async function openSealed(blob,password){
+    const {s,iv,ct}=checkPayload(blob);
+    const derived=await derive(password,s,blob.iterations);
+    try{
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:te.encode('SOL-WALLET-v2')},derived,ct);
+      const data=JSON.parse(td.decode(plain));wallet.validate(data);
+      return {data,derived,s,rounds:blob.iterations};
+    }catch(e){throw Error('Неправильна секретна фраза або пошкоджений файл.')} 
+  }
+  function readLocal(){try{const x=localStorage.getItem(STORAGE);if(!x)return null;const obj=JSON.parse(x);checkPayload(obj);return obj}catch(e){setMessage('Локальне сховище пошкоджене. Віднови зашифровану резервну копію.',true);return null}}
+  function storeLocal(blob){checkPayload(blob);localStorage.setItem(STORAGE,JSON.stringify(blob));sealed=blob}
+
+  // Never discard a different encrypted wallet during import/cloud conflict resolution.
+  // The recovery journal stores only encrypted envelopes, not the secret phrase or transactions.
+  function recoveryJournal(){
+    let raw;
+    try{raw=localStorage.getItem(RECOVERY_STORAGE)}catch(_){throw Error('Неможливо прочитати аварійний архів у браузері')}
+    if(!raw)return [];
+    let list;
+    try{list=JSON.parse(raw)}catch(_){throw Error('Аварійний архів пошкоджено. Не замінюй дані, доки не зробиш зовнішню резервну копію.')}
+    if(!Array.isArray(list)||list.length>MAX_RECOVERY)throw Error('Некоректний аварійний архів: перезапис скасовано');
+    for(const record of list){
+      if(!record||typeof record.at!=='string'||!['before-cloud-replace','before-local-replace','before-import'].includes(record.reason))throw Error('Некоректний аварійний архів: перезапис скасовано');
+      checkPayload(record.payload);
+    }
+    return list;
+  }
+  function sameEnvelope(a,b){return !!(a&&b&&a.iv===b.iv&&a.salt===b.salt&&a.ciphertext===b.ciphertext)}
+  function protectVersion(blob,reason){
+    checkPayload(blob);
+    const history=recoveryJournal();
+    if(history.some(row=>sameEnvelope(row.payload,blob)))return;
+    const fresh={at:new Date().toISOString(),reason,payload:blob};
+    try{localStorage.setItem(RECOVERY_STORAGE,JSON.stringify([fresh,...history].slice(0,MAX_RECOVERY)))}
+    catch(_){throw Error('Не вистачає місця для аварійної зашифрованої копії. Перезапис скасовано. Експортуй захищений JSON.')}
+  }
+  function recoveryCopies(){return recoveryJournal().map((row,i)=>({index:i,at:row.at,reason:row.reason}))}
+  function downloadRecovery(index){
+    if(!Number.isSafeInteger(index)||index<0)throw Error('Некоректний номер копії');
+    const rec=recoveryJournal()[index];if(!rec)throw Error('Копію не знайдено');
+    checkPayload(rec.payload);
+    download('SOL_Wallet_RECOVERY_'+rec.at.slice(0,10)+'_'+(index+1)+'.json',JSON.stringify(rec.payload,null,2));
+  }
+
+  function remember(){
+    clearTimeout(idleTimer);
+    if(!active)return;
+    idleTimer=setTimeout(()=>{lock()},15*60*1000);
+  }
+  function statusText(){return syncState==='synced'?'☁️ Хмара синхронізована':syncState==='saving'?'☁️ Збереження…':syncState==='conflict'?'⚠️ Розбіжність із хмарою; копія збережена локально':syncState==='offline'?'⚠️ Немає синхронізації, але дані захищені на пристрої':syncState==='online'?'☁️ Під’єднано до хмари':'🔐 Тільки цей пристрій · хмара не підключена'}
+  function updateStatus(){let label=byId('vaultStatus');if(label)label.textContent=statusText();let info=byId('syncInfo');if(info)info.textContent=statusText()}
+  function displayWallet(){
+    toggleGate(false);
+    active=true;wallet.loadSnapshot(currentData);updateStatus();remember();
+    // Reconnect only to the same verified account after a normal page reload.
+    // Never auto-merge divergent encrypted revisions or overwrite another device.
+    if(hasCloud&&!cloudEnabled&&getAuth())reconnectSession().catch(()=>{});
+  }
+  async function reconnectSession(){
+    if(!active||!hasCloud)return;
+    const remembered=getAuth();if(!remembered)return;
+    try{
+      auth=remembered;await getUser();
+      const remote=await remoteRead();pendingRemote=remote;remoteRevision=remote?.revision??null;
+      const local=readLocal();
+      if(!remote){syncState='online';cloudEnabled=false;updateStatus();renderGate('cloud-upload');return}
+      if(local&&local.ciphertext===remote.payload.ciphertext&&local.iv===remote.payload.iv&&local.salt===remote.payload.salt){
+        cloudEnabled=true;syncBlocked=false;syncState='synced';updateStatus();return;
+      }
+      cloudEnabled=false;syncBlocked=true;syncState='conflict';updateStatus();renderGate('cloud-choice');
+    }catch(_){cloudEnabled=false;syncState='offline';updateStatus()}
+  }
+  let currentData=null;
+  function activate(result,blob){
+    currentData=result.data;key=result.derived;salt=result.s;iterations=result.rounds;sealed=blob;
+    storeLocal(blob);displayWallet();
+  }
+  function toggleGate(on){if(!on){const c=byId('vaultGateContent');if(c)c.innerHTML=''}byId('vaultGate').classList.toggle('hidden',!on);document.querySelector('.app').classList.toggle('locked',on)}
+  function getGateContent(){return byId('vaultGateContent')}
+  const field=(type,id,placeholder='',extra='')=>`<input class="field" id="${id}" type="${type}" ${type==='password'?'autocomplete="off"':''} ${extra} placeholder="${placeholder}" required>`;
+  const localIntro=()=>`<div class="gate-panel"><h2>🔐 Локальний захищений гаманець</h2><p>Працює вже зараз, навіть без окремої бази даних. Гроші й записи будуть зашифровані в браузері.</p>`;
+  function renderGate(mode='start'){
+    gateMode=mode;toggleGate(true);setMessage('');const exists=!!readLocal();
+    if(mode==='start'){
+      const msg=exists?'Введи свою секретну фразу, щоб побачити баланс і конверти.':'Створи приватний гаманець. Секретна фраза потрібна для доступу та відновлення резервних копій.';
+      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass','Мінімум 12 символів','minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Секретна фраза не зберігається й не надсилається.':'Якщо втратиш фразу, відновити вміст буде неможливо.'}</p></div><div class="gate-actions"><button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">☁️ Увійти в хмарний гаманець</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
+      byId('vaultPass')?.focus();return;
+    }
+    if(mode==='cloud' || mode==='cloud-signup'){
+      if(!hasCloud){getGateContent().innerHTML='<div class="gate-panel"><h2>☁️ Хмара не налаштована</h2><p>Локальний зашифрований гаманець працює. Щоб синхронізувати його між пристроями, спершу треба налаштувати захищену базу та Auth.</p><button id="gateReturn" class="btn primary" type="button">← Повернутися</button></div>';return}
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>☁️ ${mode==='cloud'?'Вхід у приватну хмару':'Новий хмарний акаунт'}</h2><p>Хмарний пароль — для входу. Секретна фраза гаманця — окремий ключ шифрування, який нікуди не надсилається.</p><form data-vault-form="${mode==='cloud'?'signin':'signup'}"><label class="fieldlabel" for="accountEmail">Email</label>${field('email','accountEmail','email@example.com','autocomplete="email" maxlength="254"')}<label class="fieldlabel" for="accountPassword">Пароль хмарного акаунта</label>${field('password','accountPassword','Мінімум 12 символів','autocomplete="current-password" minlength="12" maxlength="200"')}<button class="btn primary" type="submit">${mode==='cloud'?'Увійти':'Створити акаунт'}</button></form><button class="btn ghost" id="${mode==='cloud'?'gateSignup':'gateSignin'}" type="button">${mode==='cloud'?'Створити новий акаунт':'Уже маю акаунт'}</button><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;
+      return;
+    }
+    if(mode==='remote-unlock'){
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>🔑 Відкрити хмарні дані</h2><p>Хмарний акаунт підтверджений. Тепер введи секретну фразу гаманця для розшифрування. Вона не передається серверу.</p><form data-vault-form="remote-unlock"><label class="fieldlabel" for="vaultPass">Секретна фраза гаманця</label>${field('password','vaultPass','Твоя окрема секретна фраза','minlength="12" maxlength="200"')}<button class="btn primary" type="submit">🔓 Розшифрувати й відкрити</button></form><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;return;
+    }
+    if(mode==='cloud-choice'){
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>📲 Дві різні версії гаманця</h2><p>На цьому пристрої вже є гаманець, а в хмарі — інша версія. Нічого не буде перезаписано без твого вибору.</p><div class="gate-actions"><button id="chooseRemote" class="btn primary" type="button">☁️ Відкрити версію з хмари</button><button id="chooseLocal" class="btn" type="button">📤 Замінити хмару локальною копією</button><button id="gateReturn" class="btn ghost" type="button">Назад, нічого не змінювати</button></div><p class="gate-warning">Перед заміною хмарної версії зроби зашифровану резервну копію іншого пристрою.</p></div>`;return;
+    }
+    if(mode==='cloud-upload'){
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>☁️ Синхронізація готова до запуску</h2><p>У хмарі ще немає гаманця цього акаунта. Перенести туди зашифровану копію з цього пристрою?</p><button id="confirmUpload" class="btn primary" type="button">🔐 Так, завантажити зашифровані дані</button><button id="gateReturn" class="btn ghost" type="button">Поки тільки локально</button></div>`;return;
+    }
+    if(mode==='restore'){
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>📥 Відновити приватний гаманець</h2><p>Обери зашифровану копію у форматі SOL Wallet v2. Дані цього пристрою будуть замінені.</p><form data-vault-form="restore"><label class="fieldlabel" for="gateRestoreFile">Файл .json</label><input class="field" id="gateRestoreFile" type="file" accept=".json,application/json" required><label class="fieldlabel" for="vaultPass">Секретна фраза копії</label>${field('password','vaultPass','Фраза від резервної копії','minlength="12" maxlength="200"')}<button class="btn primary" type="submit">Перевірити та відновити</button></form><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;return;
+    }
+  }
+  async function createLocal(password,migrate){
+    if(password.length<12)throw Error('Секретна фраза повинна мати щонайменше 12 символів.');
+    let data=migrate?wallet.legacyData():null;
+    if(!data)data=wallet.snapshot();wallet.validate(data);
+    const s=random(16),k=await derive(password,s,ROUNDS),blob=await seal(data,k,s,ROUNDS);
+    const decoded={data,derived:k,s,rounds:ROUNDS};activate(decoded,blob);
+    if(migrate)wallet.removeLegacy();
+    if(cloudEnabled && account){
+      try{await remoteWrite(blob);syncState='synced';updateStatus()}catch(e){syncState='offline';updateStatus()}
+    }
+  }
+  async function unlockLocal(password,blob=readLocal()){
+    if(!blob)throw Error('Захищений гаманець не знайдено');const result=await openSealed(blob,password);
+    activate(result,blob);
+    if(cloudEnabled && pendingRemote && pendingRemote.payload?.salt===blob.salt && pendingRemote.payload?.ciphertext===blob.ciphertext){syncState='synced';updateStatus()}
+  }
+  async function encryptedRestore(blob,password){
+    const result=await openSealed(blob,password);
+    if(localStorage.getItem(STORAGE)&&!confirm('Відновити копію та замінити зашифровані дані цього пристрою?'))return;
+    const existing=readLocal();
+    if(existing&&!sameEnvelope(existing,blob))protectVersion(existing,'before-import');
+    active=false;cloudEnabled=false;syncBlocked=false;syncState='local';pendingRemote=null;remoteRevision=null;
+    activate(result,blob);
+  }
+  function bearerHeaders(token,json=true){const h={'apikey':publishable};if(token&&token!==publishable)h.Authorization=`Bearer ${token}`;if(json)h['Content-Type']='application/json';return h}
+  async function readApi(path,{method='GET',payload=null,token=null,prefer=null}={}){
+    if(!hasCloud)throw Error('Сервер синхронізації ще не налаштований');
+    const headers=bearerHeaders(token||publishable,!!payload);
+    if(prefer)headers.Prefer=prefer;
+    const response=await fetch(baseUrl+path,{method,headers,body:payload?JSON.stringify(payload):undefined,cache:'no-store'});
+    let content;try{content=await response.json()}catch(_){content=null}
+    if(!response.ok){
+      let reason=content?.msg||content?.message||content?.error_description||content?.error||`HTTP ${response.status}`;
+      if(response.status===401)reason='Сесія завершилась або неправильний пароль.';
+      if(response.status===404)reason='Таблиця хмарного гаманця ще не створена або недоступна (SQL migration).';
+      const err=new Error(String(reason).slice(0,210));err.status=response.status;if(response.status===409)err.conflict=true;throw err;
+    }
+    return content;
+  }
+  function setAuth(tokens){
+    if(!tokens?.access_token||!tokens?.refresh_token)throw Error('Сервер не повернув підтверджену сесію');
+    auth={access_token:tokens.access_token,refresh_token:tokens.refresh_token,expires_at:Math.floor(Date.now()/1000)+(Number(tokens.expires_in)||3600)};
+    sessionStorage.setItem(AUTH_STORAGE,JSON.stringify(auth));
+    localStorage.removeItem(AUTH_STORAGE); // Discard persistent tokens left by old app versions.
+  }
+  function getAuth(){try{const cached=JSON.parse(sessionStorage.getItem(AUTH_STORAGE)||'null');if(!cached?.refresh_token||!cached?.access_token)return null;return cached}catch(e){return null}}
+  async function token(){
+    if(!auth)auth=getAuth();if(!auth)throw Error('Спочатку увійди в хмарний акаунт');
+    if(auth.expires_at>Math.floor(Date.now()/1000)+60)return auth.access_token;
+    try{const next=await readApi('/auth/v1/token?grant_type=refresh_token',{method:'POST',payload:{refresh_token:auth.refresh_token}});setAuth(next);return auth.access_token}
+    catch(e){auth=null;try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};localStorage.removeItem(AUTH_STORAGE);cloudEnabled=false;syncState='offline';updateStatus();throw Error('Хмарна сесія завершилася. Увійди знову. Локальні дані збережені.')}
+  }
+  async function getUser(){
+    const u=await readApi('/auth/v1/user',{token:await token()});
+    if(!/^[0-9a-f-]{36}$/i.test(u?.id||''))throw Error('Помилка перевірки власника акаунта');
+    account={id:u.id,email:u.email||''};return account;
+  }
+  async function signin(email,password){
+    if(!email.includes('@')||password.length<12)throw Error('Перевір email і пароль');
+    const result=await readApi('/auth/v1/token?grant_type=password',{method:'POST',payload:{email,password}});
+    setAuth(result);await getUser();await cloudOpen();
+  }
+  async function signup(email,password){
+    if(!email.includes('@')||password.length<12)throw Error('Введи email і пароль від 12 символів');
+    const result=await readApi('/auth/v1/signup',{method:'POST',payload:{email,password}});
+    if(result?.access_token&&result?.refresh_token){setAuth(result);await getUser();await cloudOpen();return}
+    renderGate('cloud');setMessage('Перевір пошту й підтвердь створення акаунта. Після цього увійди. Якщо реєстрацію вимкнено, акаунт додає адміністратор.');
+  }
+  async function remoteRead(){
+    const route='/rest/v1/sol_wallets?select=revision,payload,updated_at&user_id=eq.'+encodeURIComponent(account.id);
+    const rows=await readApi(route,{token:await token()});
+    if(!Array.isArray(rows))throw Error('Неправильна відповідь хмарного сховища');
+    if(!rows.length)return null;
+    if(rows.length!==1||!Number.isSafeInteger(rows[0].revision)||rows[0].revision<1)throw Error('Хмара повернула некоректну версію даних');
+    checkPayload(rows[0].payload);return rows[0];
+  }
+  async function cloudOpen(){
+    pendingRemote=await remoteRead();remoteRevision=pendingRemote?.revision??null;
+    const local=readLocal();
+    if(!pendingRemote){
+      if(local){renderGate('cloud-upload');return}
+      cloudEnabled=true;syncState='online';renderGate('start');setMessage('Акаунт підключено. Створи новий секретний гаманець — він буде синхронізуватися після першого запису.');return;
+    }
+    if(local){
+      if(local.salt===pendingRemote.payload.salt && local.iv===pendingRemote.payload.iv && local.ciphertext===pendingRemote.payload.ciphertext){
+        cloudEnabled=true;syncState='synced';
+        if(active){toggleGate(false);updateStatus()}else renderGate('start');return;
+      }
+      renderGate('cloud-choice');return;
+    }
+    renderGate('remote-unlock');
+  }
+  async function remoteWrite(blob,{replace=false}={}){
+    checkPayload(blob);
+    const t=await token();
+    if(remoteRevision===null){
+      const results=await readApi('/rest/v1/sol_wallets',{method:'POST',token:t,prefer:'return=representation',payload:{user_id:account.id,revision:1,payload:blob}});
+      if(!Array.isArray(results)||results.length!==1||results[0].revision!==1||!sameEnvelope(results[0].payload,blob))throw Error('Не вдалося перевірити запис у хмару');remoteRevision=1;return;
+    }
+    const old=remoteRevision;
+    const path='/rest/v1/sol_wallets?user_id=eq.'+encodeURIComponent(account.id)+'&revision=eq.'+encodeURIComponent(old);
+    const updated=await readApi(path,{method:'PATCH',token:t,prefer:'return=representation',payload:{revision:old+1,payload:blob}});
+    if(!Array.isArray(updated)||updated.length!==1){const error=new Error('Інший пристрій уже оновив гаманець; локальна версія захищена, потрібно вручну обрати актуальну.');error.conflict=true;throw error}
+    if(updated[0].revision!==old+1||!sameEnvelope(updated[0].payload,blob))throw Error('Сервер не підтвердив точну зашифровану версію; перевір синхронізацію');
+    remoteRevision=old+1;
+  }
+  async function forceReplaceRemote(blob){
+    const row=await remoteRead();remoteRevision=row?.revision??null;
+    if(row&&!sameEnvelope(row.payload,blob))protectVersion(row.payload,'before-cloud-replace');
+    await remoteWrite(blob);cloudEnabled=true;syncBlocked=false;syncState='synced';updateStatus();
+  }
+  async function cloudUpload(){
+    const blob=readLocal();if(!blob)throw Error('Немає локальної копії');
+    await remoteWrite(blob);cloudEnabled=true;syncBlocked=false;syncState='synced';
+    if(active){toggleGate(false);updateStatus()}else renderGate('start');
+  }
+  function persist(snapshot){
+    if(!active||!key)return Promise.reject(Error('Спочатку відкрий гаманець'));
+    const data=JSON.parse(JSON.stringify(snapshot));wallet.validate(data);
+    queue=queue.catch(()=>{}).then(async()=>{
+      const blob=await seal(data,key,salt,iterations);storeLocal(blob);
+      if(cloudEnabled&&!syncBlocked){
+        syncState='saving';updateStatus();
+        try{await remoteWrite(blob);syncState='synced'}
+        catch(e){syncState=e.conflict?'conflict':'offline';if(e.conflict){syncBlocked=true;cloudEnabled=false} console.warn('SOL sync unavailable',e?.status||e?.conflict||'network');}
+      }
+      updateStatus();
+    });
+    return queue;
+  }
+  async function syncNow(){
+    if(!active)throw Error('Спочатку відкрий гаманець');
+    if(!hasCloud)throw Error('Хмара поки не налаштована. Заповни поля нижче у «Дані та безпека».');
+    if(!account){renderGate('cloud');return 'signin'}
+    await queue;
+    const remote=await remoteRead();
+    pendingRemote=remote;
+    remoteRevision=remote?.revision??null;
+    if(!remote){renderGate('cloud-upload');return 'upload-choice'}
+    const local=readLocal();
+    if(!local)throw Error('Не знайшла локальну захищену копію.');
+    if(local.ciphertext===remote.payload.ciphertext&&local.iv===remote.payload.iv&&local.salt===remote.payload.salt){
+      syncBlocked=false;cloudEnabled=true;syncState='synced';updateStatus();return 'synced';
+    }
+    // Never make an unsafe last-writer-wins decision for money data.
+    syncBlocked=true;cloudEnabled=false;syncState='conflict';updateStatus();renderGate('cloud-choice');
+    return 'conflict-choice';
+  }
+  async function lock(){
+    if(!active){
+      auth=null;account=null;pendingRemote=null;remoteRevision=null;cloudEnabled=false;syncBlocked=false;syncState='local';
+      try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};try{localStorage.removeItem(AUTH_STORAGE)}catch(_){};
+      renderGate('start');updateStatus();return;
+    }
+    try{await queue}catch(e){}
+    active=false;key=null;salt=null;currentData=null;
+    auth=null;account=null;try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};localStorage.removeItem(AUTH_STORAGE);
+    clearTimeout(idleTimer);
+    cloudEnabled=false;syncState='local';pendingRemote=null;remoteRevision=null;syncBlocked=false;
+    wallet.onLock();renderGate('start');updateStatus();
+  }
+  function download(filename,content){const blob=new Blob([content],{type:'application/json;charset=utf-8'});const href=URL.createObjectURL(blob),a=document.createElement('a');a.href=href;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(href),2500)}
+  async function exportEncrypted(){await queue;const blob=readLocal();if(!blob)throw Error('Немає захищеної копії');download('SOL_Wallet_ENCRYPTED_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(blob,null,2))}
+  async function restoreEncrypted(blob,validate){checkPayload(blob);
+    if(!active)throw Error('Спочатку відкрий гаманець');
+    // Importing another vault requires locking, entering its own password and decrypting.
+    if(blob.salt!==sealed?.salt)throw Error('Ця копія має іншу секретну фразу. Заблокуй гаманець і вибери «Відновити захищений JSON».');
+    try{
+      const {iv,ct}=checkPayload(blob);
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv,additionalData:te.encode('SOL-WALLET-v2')},key,ct);
+      const data=JSON.parse(td.decode(plain));validate(data);
+      if(!confirm('Замінити записи поточного гаманця даними з цієї захищеної копії?'))return;
+      await queue;const existing=readLocal();
+      if(existing&&!sameEnvelope(existing,blob))protectVersion(existing,'before-import');
+      storeLocal(blob);currentData=data;wallet.afterRestore(data);syncBlocked=true;cloudEnabled=false;syncState='local';updateStatus();
+    }catch(e){if(e.name==='OperationError')throw Error('Файл не розшифровується поточним ключем. Заблокуй і віднови з секретною фразою копії.');throw e}
+  }
+  function showCloud(){if(!active)return;
+    if(!hasCloud){const where=byId('syncInfo');if(where)where.textContent='☁️ Для хмарної синхронізації потрібна власна база Supabase і налаштований конфігураційний файл. Поки що дані залишаються захищеними локально.';return}
+    renderGate('cloud');
+  }
+  async function handleForm(e){
+    const f=e.target.closest('form[data-vault-form]');if(!f)return;e.preventDefault();const task=f.dataset.vaultForm;
+    const button=f.querySelector('button[type=submit]');button.disabled=true;setMessage('Перевіряю…');
+    try{
+      if(task==='create'){
+        const pass=byId('vaultPass').value;if(pass!==byId('vaultPass2').value)throw Error('Секретні фрази не збігаються');
+        await createLocal(pass,!!byId('migrateOld')?.checked);
+        if(cloudEnabled){syncState='online';updateStatus()}
+      }else if(task==='unlock'){await unlockLocal(byId('vaultPass').value)}
+      else if(task==='signup'){await signup(byId('accountEmail').value.trim(),byId('accountPassword').value)}
+      else if(task==='signin'){await signin(byId('accountEmail').value.trim(),byId('accountPassword').value)}
+      else if(task==='remote-unlock'){
+        const remote=pendingRemote;
+        if(!remote)throw Error('Хмарна копія недоступна');const result=await openSealed(remote.payload,byId('vaultPass').value);
+        const existing=readLocal();
+        if(existing&&!sameEnvelope(existing,remote.payload))protectVersion(existing,'before-local-replace');
+        cloudEnabled=true;syncBlocked=false;syncState='synced';activate(result,remote.payload);
+      }
+      else if(task==='restore'){
+        const file=byId('gateRestoreFile').files[0];if(!file||file.size>10000000)throw Error('Обери коректний файл до 10 МБ');
+        const blob=JSON.parse(await file.text());await encryptedRestore(blob,byId('vaultPass').value);
+      }
+      setMessage('');
+    }catch(err){setMessage(err.message||'Не вдалося виконати операцію',true)}
+    finally{button.disabled=false}
+  }
+  async function handleClick(e){
+    const element=e.target.closest('button');if(!element)return;
+    const v=element.id;
+    if(!['gateRestore','gateCloud','gateReturn','gateSignup','gateSignin','chooseRemote','chooseLocal','confirmUpload'].includes(v))return;
+    try{
+      if(v==='gateRestore')renderGate('restore');
+      if(v==='gateCloud')renderGate('cloud');
+      if(v==='gateReturn'){
+        if(active){
+          // Cancel an unfinished cloud-link flow without leaving an unused session token behind.
+          if(!cloudEnabled&&account){auth=null;account=null;pendingRemote=null;remoteRevision=null;syncBlocked=false;syncState='local';
+            try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};try{localStorage.removeItem(AUTH_STORAGE)}catch(_){};updateStatus()}
+          toggleGate(false);
+        }else await lock();
+      }
+      if(v==='gateSignup')renderGate('cloud-signup');
+      if(v==='gateSignin')renderGate('cloud');
+      if(v==='confirmUpload'){element.disabled=true;await cloudUpload()}
+      if(v==='chooseRemote'){
+        if(!confirm('Хмарна версія замінить локальні записи на цьому пристрої. Зроби резервну копію, якщо вони потрібні. Продовжити?'))return;
+        active=false;key=null;salt=null;currentData=null;wallet.onLock();
+        // The old encrypted local copy stays untouched until the remote vault is successfully decrypted.
+        renderGate('remote-unlock');
+      }
+      if(v==='chooseLocal'){
+        if(!confirm('Зашифрована локальна версія замінить хмарну. Цю дію не можна скасувати. Продовжити?'))return;
+        element.disabled=true;await forceReplaceRemote(readLocal());
+        if(active){toggleGate(false)}else renderGate('start');
+      }
+    }catch(err){setMessage(err.message||'Помилка',true)}finally{element.disabled=false}
+  }
+  function init(api){
+    wallet=api;try{localStorage.removeItem(AUTH_STORAGE)}catch(_){}; if(!supportsCrypto()) {getGateContent().innerHTML='<div class="gate-panel"><h2>Браузер не підтримує захищений режим</h2><p>Відкрийте застосунок через HTTPS у сучасному браузері. Не вводьте фінансові дані, доки шифрування не працює.</p></div>';return}
+    document.addEventListener('submit',handleForm);
+    document.addEventListener('click',handleClick);
+    for(const event of ['pointerdown','keydown','touchstart'])document.addEventListener(event,remember,{passive:true});
+    window.addEventListener('online',()=>{if(active&&account&&syncState==='offline'){syncNow().catch(()=>{})}});
+    renderGate('start');
+  }
+  window.SOLVault={init,persist,exportEncrypted,restoreEncrypted,lock,showCloud,statusText,syncNow,recoveryCopies,downloadRecovery};
+})();
+
+</script>
+<script>
+/* SOL Wallet 4.0 pure, dependency-free planning rules.
+   A calendar obligation is NEVER a real bank debit. Only recorded expense transactions change balances. */
+(function(root,factory){
+ 'use strict';
+ const api=factory();
+ if(typeof module==='object'&&module.exports)module.exports=api;
+ if(root)root.SOLPlanner=api;
+})(typeof window!=='undefined'?window:null,function(){
+ 'use strict';
+ const LIMIT=100000000000;
+ function isDate(value){
+   if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
+   const [y,m,d]=value.split('-').map(Number);
+   if(y<2000||y>2099||m<1||m>12||d<1||d>31)return false;
+   const check=new Date(Date.UTC(y,m-1,d));return check.getUTCFullYear()===y&&check.getUTCMonth()+1===m&&check.getUTCDate()===d;
+ }
+ function isMonth(value){return typeof value==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(value)&&+value.slice(0,4)>=2000&&+value.slice(0,4)<=2099}
+ function dayCount(month){const [y,m]=month.split('-').map(Number);return new Date(Date.UTC(y,m,0)).getUTCDate()}
+ function dueDate(month,day){return month+'-'+String(Math.min(day,dayCount(month))).padStart(2,'0')}
+ function monthShift(month,offset){if(!isMonth(month)||!Number.isInteger(offset)||Math.abs(offset)>120)return null;const [y,m]=month.split('-').map(Number);const d=new Date(Date.UTC(y,m-1+offset,1));return d.toISOString().slice(0,7)}
+ function shiftDay(date,offset){if(!isDate(date)||!Number.isInteger(offset)||Math.abs(offset)>4000)return null;const d=new Date(date+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+offset);return d.toISOString().slice(0,10)}
+ function diffDays(date,today){return Math.round((Date.parse(date+'T00:00:00Z')-Date.parse(today+'T00:00:00Z'))/86400000)}
+ function defaultPlanner(){return {bills:[],debts:[],settings:{personal:{nextIncomeDate:'',expectedIncomeCents:0},business:{nextIncomeDate:'',expectedIncomeCents:0}}}}
+ function ensurePlanner(state){if(!state.planner)state.planner=defaultPlanner();return state}
+ const digits=n=>Number.isSafeInteger(n)&&n>=0&&n<=LIMIT;
+ function validatePlanner(state){
+   const planner=state?.planner;
+   if(planner==null)return;
+   if(!planner||!Array.isArray(planner.bills)||!Array.isArray(planner.debts)||planner.bills.length>250||planner.debts.length>250||!planner.settings)throw Error('Пошкоджені фінансові плани');
+   const allIds=new Set();
+   for(const wallet of ['personal','business']){
+     const settings=planner.settings[wallet];
+     if(!settings||typeof settings.nextIncomeDate!=='string'||(settings.nextIncomeDate&&!isDate(settings.nextIncomeDate))||!digits(settings.expectedIncomeCents))throw Error('Некоректна дата або сума очікуваного доходу');
+   }
+   for(const item of [...planner.bills,...planner.debts]){
+     if(!item||typeof item.id!=='string'||item.id.length<1||item.id.length>120||allIds.has(item.id)||!['personal','business'].includes(item.wallet)||typeof item.name!=='string'||item.name.length>90||!item.name.trim()||typeof item.categoryId!=='string'||!state.wallets[item.wallet].categories.some(c=>c.id===item.categoryId)||typeof item.active!=='boolean')throw Error('Некоректний платіж або борг');
+     allIds.add(item.id);
+   }
+   for(const item of planner.bills){
+     if(!digits(item.cents)||item.cents===0||!['monthly','once'].includes(item.frequency)||!Number.isInteger(item.day)||item.day<1||item.day>31||!isMonth(item.startMonth)||typeof item.dueDate!=='string'||(item.frequency==='once'&&!isDate(item.dueDate))||(item.frequency==='monthly'&&item.dueDate!==''))throw Error('Некоректна сума або дата рахунку');
+   }
+   for(const item of planner.debts){
+     if(!digits(item.principalCents)||item.principalCents===0||!digits(item.paymentCents)||item.paymentCents===0||!Number.isInteger(item.day)||item.day<1||item.day>31||!isMonth(item.startMonth)||typeof item.reference!=='string'||item.reference.length>120)throw Error('Некоректна сума, номер або дата боргу');
+   }
+   const knownBills=new Map(planner.bills.map(b=>[b.id,b]));
+   const knownDebts=new Map(planner.debts.map(d=>[d.id,d]));
+   const debtPaid=new Map();
+   for(const t of state.transactions){
+     if(t.billId!==undefined||t.debtId!==undefined){
+       if(t.type!=='expense'||!isMonth(t.occurrence)||Boolean(t.billId)===Boolean(t.debtId))throw Error('Помилка прив’язки оплати');
+       const item=t.billId?knownBills.get(t.billId):knownDebts.get(t.debtId);
+       if(!item||item.wallet!==t.wallet)throw Error('Оплата прив’язана до відсутнього зобов’язання');
+       if(t.billId){
+         if(item.frequency==='once'&&item.dueDate.slice(0,7)!==t.occurrence)throw Error('Неправильний місяць оплати рахунку');
+         if(item.frequency==='monthly'&&item.startMonth>t.occurrence)throw Error('Оплата раніше початку плану');
+       }else{
+         if(t.occurrence<item.startMonth)throw Error('Оплата боргу раніше початку плану');
+         debtPaid.set(t.debtId,(debtPaid.get(t.debtId)||0)+t.cents);
+       }
+     }
+   }
+   for(const item of planner.debts)if((debtPaid.get(item.id)||0)>item.principalCents)throw Error('Сума погашень більша за внесений залишок боргу');
+ }
+ function linkedSum(state,key,id,month){return state.transactions.reduce((sum,t)=>sum+(t.type==='expense'&&t[key]===id&&t.occurrence===month?t.cents:0),0)}
+ function paidDebt(state,id,untilMonth){return state.transactions.reduce((s,t)=>s+(t.type==='expense'&&t.debtId===id&&(!untilMonth||t.occurrence<untilMonth)?t.cents:0),0)}
+ function debtBalance(state,item){return Math.max(0,item.principalCents-paidDebt(state,item.id))}
+ function monthEntries(state,wallet,month,today,options={}){
+   if(!isMonth(month)||!isDate(today))throw Error('Некоректний календарний місяць');
+   const out=[],planner=state.planner||defaultPlanner();
+   const isDueAllowed=(item,date)=>item.active||date<today;
+   for(const bill of planner.bills){
+     if(bill.wallet!==wallet)continue;
+     const date=bill.frequency==='monthly'&&month>=bill.startMonth?dueDate(month,bill.day):bill.frequency==='once'&&bill.dueDate.slice(0,7)===month?bill.dueDate:null;
+     if(!date||!isDueAllowed(bill,date))continue;
+     const paid=linkedSum(state,'billId',bill.id,month);
+     out.push({key:'bill:'+bill.id+':'+month,id:bill.id,kind:'bill',wallet,name:bill.name,categoryId:bill.categoryId,period:month,date,dueCents:bill.cents,paidCents:paid,unpaidCents:Math.max(0,bill.cents-paid),active:bill.active});
+   }
+   for(const debt of planner.debts){
+     if(debt.wallet!==wallet||month<debt.startMonth)continue;
+     const date=dueDate(month,debt.day),paid=linkedSum(state,'debtId',debt.id,month),balanceBefore=Math.max(0,debt.principalCents-paidDebt(state,debt.id,month));
+     const due=Math.min(debt.paymentCents,balanceBefore);
+     if(!due||!isDueAllowed(debt,date))continue;
+     out.push({key:'debt:'+debt.id+':'+month,id:debt.id,kind:'debt',wallet,name:debt.name,categoryId:debt.categoryId,period:month,date,dueCents:due,paidCents:paid,unpaidCents:Math.max(0,due-paid),active:debt.active});
+   }
+   for(const e of out){e.status=e.unpaidCents===0?'paid':e.date<today?'overdue':e.paidCents>0?'partial':e.date===today?'today':diffDays(e.date,today)<=7?'soon':'upcoming';}
+   return out.sort((a,b)=>a.date.localeCompare(b.date)||a.kind.localeCompare(b.kind)||a.name.localeCompare(b.name,'uk'));
+ }
+ function upcomingEntries(state,wallet,today,nextIncomeDate){
+   if(!isDate(today))throw Error('Некоректна сьогоднішня дата');
+   const picked=isDate(nextIncomeDate)&&nextIncomeDate>today&&diffDays(nextIncomeDate,today)<=366;
+   const until=picked?nextIncomeDate:shiftDay(today,30);
+   const since=monthShift(today.slice(0,7),-12); // unpaid obligations of last twelve calendar months included
+   const untilMonth=until.slice(0,7);
+   const all=[];
+   for(let month=since;month<=untilMonth;month=monthShift(month,1)){
+     for(const entry of monthEntries(state,wallet,month,today)){
+       if(entry.date>=until||entry.unpaidCents===0)continue;
+       all.push({...entry});
+     }
+   }
+   all.sort((a,b)=>a.date.localeCompare(b.date)||a.kind.localeCompare(b.kind));
+   // Debt balance is finite. Don't book more forecast payments than the outstanding principal.
+   const plannedDebtRemaining=new Map((state.planner?.debts||[]).map(d=>[d.id,debtBalance(state,d)]));
+   for(const entry of all){
+     if(entry.kind!=='debt')continue;
+     const left=plannedDebtRemaining.get(entry.id)||0;
+     entry.unpaidCents=Math.min(left,entry.unpaidCents);
+     plannedDebtRemaining.set(entry.id,Math.max(0,left-entry.unpaidCents));
+   }
+   return {entries:all.filter(e=>e.unpaidCents>0),until,chosen:picked};
+ }
+ function forecast(state,wallet,bucketBalances,today){
+   const settings=(state.planner||defaultPlanner()).settings[wallet];
+   const result=upcomingEntries(state,wallet,today,settings.nextIncomeDate);
+   const envelopes=state.wallets[wallet].categories;
+   const dueByCat=Object.fromEntries(envelopes.map(c=>[c.id,0]));
+   let dueCents=0,overdueCents=0;
+   for(const entry of result.entries){dueByCat[entry.categoryId]+=entry.unpaidCents;dueCents+=entry.unpaidCents;if(entry.date<today)overdueCents+=entry.unpaidCents;}
+   const balance=envelopes.reduce((sum,c)=>sum+(bucketBalances[c.id]||0),0);
+   const flex=envelopes.filter(c=>c.kind==='flex').reduce((sum,c)=>sum+(bucketBalances[c.id]||0),0);
+   const unfunded=envelopes.reduce((sum,c)=>sum+Math.max(0,dueByCat[c.id]-(bucketBalances[c.id]||0)),0);
+   const unusedFlex=envelopes.filter(c=>c.kind==='flex').reduce((sum,c)=>sum+Math.max(0,(bucketBalances[c.id]||0)-dueByCat[c.id]),0);
+   const protectedShortfall=envelopes.filter(c=>c.kind==='protected').reduce((sum,c)=>sum+Math.max(0,dueByCat[c.id]-(bucketBalances[c.id]||0)),0);
+   const safeFlex=Math.max(0,Math.min(unusedFlex-protectedShortfall,balance-dueCents));
+   return {...result,balance,dueCents,overdueCents,afterCents:balance-dueCents,flexCents:flex,safeFlexCents:safeFlex,unfundedCents:unfunded,dueByCat,expectedIncomeCents:settings.expectedIncomeCents};
+ }
+ return {defaultPlanner,ensurePlanner,validatePlanner,isDate,isMonth,dayCount,dueDate,monthShift,shiftDay,diffDays,linkedSum,paidDebt,debtBalance,monthEntries,upcomingEntries,forecast};
+});
+
+</script>
+<script>
+/* SOL Wallet v4 — deterministic reminders and privacy-conscious calendar export.
+   No push server: browser alerts are delivered only while the app is open/unlocked.
+   Calendar export is explicitly user-initiated and UNENCRYPTED. */
+(function(root,factory){
+  'use strict';
+  const api=factory(typeof module==='object'&&module.exports?require('./planner-core.js'):root.SOLPlanner);
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  if(root)root.SOLReminders=api;
+})(typeof window!=='undefined'?window:null,function(P){
+  'use strict';
+  const DAY_OPTIONS=[0,1,3,7,14];
+  function defaultSettings(){return {daysBefore:3,browserAlerts:false};}
+  function ensureSettings(state){
+    P.ensurePlanner(state);
+    if(!state.planner.reminders)state.planner.reminders=defaultSettings();
+    return state.planner.reminders;
+  }
+  function validateSettings(state){
+    const o=state?.planner?.reminders;
+    if(o===undefined)return;
+    if(!o||!DAY_OPTIONS.includes(o.daysBefore)||typeof o.browserAlerts!=='boolean')throw Error('Некоректні правила нагадувань');
+  }
+  const periods=(today,count)=>{
+    const out=[];
+    for(let i=0;i<count;i++)out.push(P.monthShift(today.slice(0,7),i));
+    return out;
+  };
+  function upcoming(state,today,opts={}){
+    if(!P.isDate(today))throw Error('Невірна дата нагадування');
+    const settings=state.planner?.reminders||defaultSettings();
+    const days=opts.daysBefore??settings.daysBefore;
+    if(!DAY_OPTIONS.includes(days))throw Error('Некоректний інтервал нагадувань');
+    const items=[];
+    for(const wallet of ['personal','business']){
+      const until=P.shiftDay(today,days+1);
+      const range=P.upcomingEntries(state,wallet,today,until);
+      for(const entry of range.entries){
+        if(entry.unpaidCents===0||entry.date>=until)continue;
+        items.push({...entry,wallet,daysAway:P.diffDays(entry.date,today)});
+      }
+    }
+    items.sort((a,b)=>a.date.localeCompare(b.date)||a.wallet.localeCompare(b.wallet)||a.name.localeCompare(b.name,'uk'));
+    if(opts.wallet)return items.filter(x=>x.wallet===opts.wallet);
+    return items;
+  }
+  function summary(rows){return {total:rows.length,overdue:rows.filter(x=>x.daysAway<0).length,today:rows.filter(x=>x.daysAway===0).length,soon:rows.filter(x=>x.daysAway>0).length,cents:rows.reduce((n,x)=>n+x.unpaidCents,0)};}
+  // RFC 5545 string escaping. No user-supplied HTML, and no sensitive details by default.
+  function safeText(t){return String(t).replace(/\\/g,'\\\\').replace(/\r\n|\r|\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');}
+  function foldLine(line){
+    // Fold by UTF-8 byte count, avoiding invalid multibyte sequences.
+    const chunks=[];let cur='',length=0;
+    for(const ch of line){const bytes=BufferOrTextLength(ch);if(length+bytes>72){chunks.push(cur);cur=' ';length=1;}cur+=ch;length+=bytes;}
+    chunks.push(cur);return chunks.join('\r\n');
+  }
+  function BufferOrTextLength(value){
+    if(typeof TextEncoder!=='undefined')return new TextEncoder().encode(value).length;
+    if(typeof Buffer!=='undefined')return Buffer.byteLength(value,'utf8');
+    return unescape(encodeURIComponent(value)).length;
+  }
+  function futureCalendarEntries(state,today,wallets=['personal','business'],months=12){
+    if(!P.isDate(today)||!Number.isInteger(months)||months<1||months>18||!Array.isArray(wallets)||wallets.some(w=>!['personal','business'].includes(w)))throw Error('Невірні налаштування календаря');
+    const result=[];
+    const periodsList=periods(today,months);
+    for(const wallet of [...new Set(wallets)]){
+      const debts=state.planner?.debts||[];
+      const debtLeft=new Map(debts.filter(d=>d.wallet===wallet).map(d=>[d.id,P.debtBalance(state,d)]));
+      for(const period of periodsList){
+        for(const item of P.monthEntries(state,wallet,period,today)){
+          if(item.date<today||item.unpaidCents<=0||!item.active)continue;
+          if(item.kind==='debt'){
+            const left=debtLeft.get(item.id)||0;
+            if(left<=0)continue;
+            const applied=Math.min(item.unpaidCents,left);
+            debtLeft.set(item.id,left-applied);
+          }
+          result.push({...item,wallet});
+        }
+      }
+    }
+    result.sort((a,b)=>a.date.localeCompare(b.date)||a.wallet.localeCompare(b.wallet));
+    return result.slice(0,1500);
+  }
+  function toICS(state,today,opts={}){
+    const wallets=opts.wallets||['personal','business'];
+    const includeDetails=opts.includeDetails===true;
+    const months=opts.months||12;
+    const daysBefore=opts.daysBefore??state.planner?.reminders?.daysBefore??3;
+    if(!DAY_OPTIONS.includes(daysBefore))throw Error('Неправильний інтервал нагадувань');
+    const events=futureCalendarEntries(state,today,wallets,months);
+    const dtstamp=(opts.now instanceof Date?opts.now:new Date()).toISOString().replace(/[-:]/g,'').replace(/\.[0-9]+Z$/,'Z');
+    const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//SOL Wallet//Wallet 4 Calendar//UK','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:SOL Wallet — нагадування'];
+    for(const x of events){
+      const name=includeDetails?`SOL Wallet: ${x.name}`:'SOL Wallet: перевірити платіж';
+      const description=includeDetails?`${x.wallet==='personal'?'Сім’я':'Бізнес BMH'} — ${(x.unpaidCents/100).toFixed(2)} EUR. Запис у SOL Wallet; оплата не автоматична.`:'Відкрий захищений SOL Wallet та перевір деталі платежу. Подія не здійснює оплату.';
+      const uid=`${x.wallet}-${x.kind}-${encodeURIComponent(x.id).replace(/%/g,'')}-${x.period}@sol-wallet.invalid`;
+      lines.push('BEGIN:VEVENT',`UID:${uid}`,`DTSTAMP:${dtstamp}`,`DTSTART:${x.date.replace(/-/g,'')}T090000`,`DTEND:${x.date.replace(/-/g,'')}T091500`,`SUMMARY:${safeText(name)}`,`DESCRIPTION:${safeText(description)}`,
+        'STATUS:CONFIRMED',
+        'BEGIN:VALARM',`TRIGGER:-P${daysBefore}D`, 'ACTION:DISPLAY', 'DESCRIPTION:Перевір платіж у SOL Wallet', 'END:VALARM','END:VEVENT');
+    }
+    lines.push('END:VCALENDAR');
+    return {text:lines.map(foldLine).join('\r\n')+'\r\n',count:events.length,details:includeDetails};
+  }
+  return {DAY_OPTIONS,defaultSettings,ensureSettings,validateSettings,upcoming,summary,futureCalendarEntries,toICS};
+});
+
+</script>
+<script>
+/* Optional, privacy-preserving notifications WHILE WALLET PAGE IS OPEN.
+   Does NOT run background push or send any financial details to a server. */
+'use strict';
+(function(){
+ let active=false,snapshot=null,intervalId=null,notifying=false;
+ const stampKey='SOL_WALLET_V4_LAST_NOTICE';
+ function localDay(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+ function supported(){return !!(window.isSecureContext&&'Notification' in window && typeof Notification.requestPermission==='function')}
+ function permission(){return supported()?Notification.permission:'unsupported'}
+ async function request(){
+   if(!supported())return 'unsupported';
+   try{return await Notification.requestPermission()}catch(_){return 'denied'}
+ }
+ function alreadyShown(day){try{return sessionStorage.getItem(stampKey)===day}catch(_){return false}}
+ function markShown(day){try{sessionStorage.setItem(stampKey,day)}catch(_){}}
+ async function check(){
+   if(notifying||!active||!snapshot||document.visibilityState==='hidden'||!supported()||Notification.permission!=='granted'||!snapshot.planner?.reminders?.browserAlerts)return false;
+   const day=localDay();if(alreadyShown(day))return false;
+   const rows=window.SOLReminders.upcoming(snapshot,day);
+   if(!rows.length)return false;
+   notifying=true;
+   try{
+     const n=window.SOLReminders.summary(rows);
+     const title='SOL Wallet · нагадування';
+     const body=n.overdue?`Є прострочені платежі (${n.overdue}). Відкрий гаманець для деталей.`:`Маєш ${n.total} запланованих платежів. Відкрий гаманець для деталей.`;
+     if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+       const ready=await navigator.serviceWorker.ready;
+       await ready.showNotification(title,{body,tag:'sol-wallet-reminders',icon:'./icon-192.png',badge:'./icon-192.png',renotify:false});
+     }else{
+       new Notification(title,{body,tag:'sol-wallet-reminders'});
+     }
+     markShown(day);return true;
+   }catch(_){return false}finally{notifying=false}
+ }
+ function onUnlock(data){snapshot=data;active=true;if(!intervalId)intervalId=setInterval(check,15*60*1000);setTimeout(check,1500)}
+ function onLock(){snapshot=null;active=false;clearInterval(intervalId);intervalId=null}
+ function update(data){if(active)snapshot=data}
+ window.addEventListener('focus',()=>{if(active)check()});
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&active)check()});
+ window.SOLReminderNotifier={permission,request,onUnlock,onLock,update,check};
+})();
+
+</script>
+<script>
+'use strict';
+(function(){
+ const KEY='SOL_WALLET_V1'; // Legacy read only for explicitly approved migration
+ const COLORS=['#81dfae','#82c8ed','#d8adff','#f2c26e','#ffaaa9','#90e4d8','#f5d88b','#a5bdfa','#e49fcb','#9eccae','#b5cad8','#75bbc4'];
+ const DEFAULT={version:1,wallets:{
+   personal:{name:'Сімейний бюджет',categories:[
+     {id:'rent',name:'Оренда квартири',icon:'🏠',pct:30,kind:'protected',target:0,due:1},
+     {id:'utilities',name:'Комунальні послуги',icon:'💡',pct:10,kind:'protected',target:0,due:10},
+     {id:'groceries',name:'Продукти',icon:'🛒',pct:15,kind:'protected',target:0,due:0},
+     {id:'debts',name:'Погашення боргів',icon:'📋',pct:12,kind:'protected',target:0,due:0},
+     {id:'children',name:'Діти',icon:'🧸',pct:8,kind:'flex',target:0,due:0},
+     {id:'transport',name:'Транспорт',icon:'🚙',pct:7,kind:'protected',target:0,due:0},
+     {id:'health',name:'Здоров’я',icon:'❤️',pct:5,kind:'protected',target:0,due:0},
+     {id:'cafe',name:'Кафе',icon:'☕',pct:3,kind:'flex',target:0,due:0},
+     {id:'fun',name:'Розваги',icon:'🎉',pct:3,kind:'flex',target:0,due:0},
+     {id:'reserve',name:'Недоторканний резерв',icon:'🛟',pct:7,kind:'protected',target:0,due:0},
+     {id:'private_tax',name:'Особисті податки / збори',icon:'🧾',pct:0,kind:'protected',target:0,due:0}
+   ]},
+   business:{name:'Бізнес BMH',categories:[
+     {id:'business_tax',name:'Резерв на податки',icon:'🧾',pct:25,kind:'protected',target:0,due:0},
+     {id:'vat',name:'ПДВ (якщо застосовується)',icon:'📑',pct:0,kind:'protected',target:0,due:0},
+     {id:'operations',name:'Робочі витрати',icon:'🖥️',pct:20,kind:'protected',target:0,due:0},
+     {id:'ads',name:'Реклама / розвиток',icon:'📣',pct:10,kind:'flex',target:0,due:0},
+     {id:'business_reserve',name:'Резерв бізнесу',icon:'🏦',pct:10,kind:'protected',target:0,due:0},
+     {id:'owner',name:'Виплати собі',icon:'💚',pct:35,kind:'protected',target:0,due:0}
+   ]}
+ },transactions:[],planner:window.SOLPlanner.defaultPlanner()};
+ const clone=x=>JSON.parse(JSON.stringify(x));
+ const money=cents=>new Intl.NumberFormat('uk-UA',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(cents/100).replace(/EUR/g,'€');
+ const moneyCompact=cents=>new Intl.NumberFormat('uk-UA',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(cents/100).replace(/EUR/g,'€');
+ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const fmtDate=s=>{const parts=String(s||'').split('-');return parts.length===3?`${parts[2]}.${parts[1]}.${parts[0]}`:esc(s)};
+ const localDate=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
+ const currentMonth=()=>localDate().slice(0,7);
+ const id=()=>typeof crypto!=='undefined' && crypto.randomUUID?crypto.randomUUID():'tx-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+ const parseEuro=v=>{const s=String(v??'').replace(/\s/g,'').replace(',','.');if(!/^\d{1,9}(?:\.\d{1,2})?$/.test(s))return NaN;return Math.round(Number(s)*100)};
+ const euroInput=cents=>(cents/100).toFixed(2);
+ let storeAvailable=true;
+ function load(){try{const s=localStorage.getItem(KEY);if(!s)return clone(DEFAULT);const obj=JSON.parse(s);validate(obj);return obj}catch(e){console.warn('SOL Wallet storage:',e);if(e && e.name==='SecurityError')storeAvailable=false;return clone(DEFAULT)}}
+ let state=clone(DEFAULT);
+ let unlocked=false;
+ const ui={page:'overview',wallet:'personal',preview:'1000',month:currentMonth(),plannerMonth:currentMonth()};
+ const getCats=w=>state.wallets[w].categories;
+ function category(w,id){return getCats(w).find(c=>c.id===id)}
+ function save(){window.SOLReminderNotifier?.update(state);window.SOLVault.persist(state).then(()=>{storeAvailable=true}).catch(e=>{storeAvailable=false;toast('Не вдалося захистити зміни: '+(e.message||'Помилка'),true)})}
+ function allocation(cents,cats){const weights=cats.map((c,i)=>({id:c.id,n:Math.floor(cents*c.pct/100),r:cents*c.pct/100-Math.floor(cents*c.pct/100),i}));let left=cents-weights.reduce((s,a)=>s+a.n,0);for(const a of weights.slice().sort((a,b)=>b.r-a.r||a.i-b.i).slice(0,left))a.n++;return weights.map(a=>({id:a.id,cents:a.n}));}
+ function plannedAllocation(cents,w,date=localDate()){
+   const cats=getCats(w);
+   const plan=cats.map(c=>({id:c.id,cents:0}));
+   const month=String(date).slice(0,7);
+   const funded=monthData(w,month).funded;
+   const priority=cats.map((c,i)=>({...c,i})).filter(c=>c.kind==='protected'&&c.target>0)
+     .sort((a,b)=>(a.due||32)-(b.due||32)||a.i-b.i);
+   let rest=cents;
+   for(const c of priority){const shortfall=Math.max(0,c.target-(funded[c.id]||0));const amount=Math.min(rest,shortfall);plan[c.i].cents+=amount;rest-=amount;if(rest===0)break}
+   if(rest>0){let eligible=cats.filter(c=>!(c.kind==='protected'&&c.target>0));
+     if(!eligible.length)eligible=cats;
+     const total=eligible.reduce((s,c)=>s+c.pct,0);
+     if(total===0)eligible=eligible.map(c=>({...c,pct:1}));
+     const denominator=eligible.reduce((s,c)=>s+c.pct,0);
+     const weighted=eligible.map((c,i)=>({id:c.id,n:Math.floor(rest*c.pct/denominator),fraction:rest*c.pct/denominator-Math.floor(rest*c.pct/denominator),i}));
+     let left=rest-weighted.reduce((s,a)=>s+a.n,0);
+     for(const a of weighted.slice().sort((a,b)=>b.fraction-a.fraction||a.i-b.i).slice(0,left))a.n++;
+     for(const a of weighted)plan[cats.findIndex(c=>c.id===a.id)].cents+=a.n;
+   }
+   return plan;
+ }
+ function ratiosOk(w){return getCats(w).reduce((s,c)=>s+c.pct,0)===100}
+ function emptyBuckets(){const res={personal:{},business:{}};for(const w of ['personal','business'])for(const c of getCats(w))res[w][c.id]=0;return res}
+ function balances(){const b=emptyBuckets();for(const t of state.transactions){if(t.type==='income'){for(const a of t.allocations)b[t.wallet][a.id]+=a.cents}
+      else if(t.type==='expense')b[t.wallet][t.category]-=t.cents;
+      else if(t.type==='move'){b[t.wallet][t.from]-=t.cents;b[t.wallet][t.to]+=t.cents}
+      else if(t.type==='owner'){b.business.owner-=t.cents;for(const a of t.allocations)b.personal[a.id]+=a.cents;}}
+   return b}
+ function walletSum(b,w){return Object.values(b[w]).reduce((s,v)=>s+v,0)}
+ function monthData(w,m){const funded={},spent={};for(const c of getCats(w)){funded[c.id]=0;spent[c.id]=0}
+   for(const t of state.transactions){if(!t.date.startsWith(m))continue;
+     if(t.type==='income' && t.wallet===w)for(const a of t.allocations)funded[a.id]+=a.cents;
+     if(t.type==='owner' && w==='personal')for(const a of t.allocations)funded[a.id]+=a.cents;
+     if(t.type==='expense' && t.wallet===w)spent[t.category]+=t.cents;
+     if(t.type==='move' && t.wallet===w){funded[t.from]-=t.cents;funded[t.to]+=t.cents}}
+   return {funded,spent}}
+ function txSignedAmount(t,w){if(t.type==='income')return t.wallet===w?t.cents:null;
+   if(t.type==='expense')return t.wallet===w?-t.cents:null;
+   if(t.type==='move')return t.wallet===w?0:null;
+   if(t.type==='owner')return w==='personal'?t.cents:-t.cents;return null}
+ function desc(t,w){if(t.type==='income')return t.note||'Надходження';if(t.type==='expense')return t.note||(t.billId?'Рахунок: '+itemLabel('bill',t.billId):t.debtId?'Борг: '+itemLabel('debt',t.debtId):category(w,t.category)?.name||'Витрата');if(t.type==='move')return `Переміщено: ${category(w,t.from)?.name||'—'} → ${category(w,t.to)?.name||'—'}`;if(t.type==='owner')return w==='personal'?'Переказ від бізнесу — особисті кошти':'Виплата собі (Privatentnahme)';return '—'}
+ function txIcon(t){return {income:'↙',expense:'↗',move:'⇄',owner:'⇢'}[t.type]||'•'}
+ function addTx(t){const test=clone(state);test.transactions.push(t);const prev=state;state=test;try{validate(state)}catch(e){state=prev;throw e}save();render()}
+ function validate(o){if(!o||o.version!==1||!o.wallets||!Array.isArray(o.transactions)||o.transactions.length>20000)throw Error('Неправильний формат резервної копії');
+   for(const w of ['personal','business']){const cats=o.wallets[w]?.categories;if(!Array.isArray(cats)||cats.length<1||cats.length>45)throw Error('Невірні категорії');const seen=new Set();let sum=0;
+      for(const c of cats){if(typeof c.id!=='string'||c.id.length>70||seen.has(c.id)||typeof c.name!=='string'||!c.name.trim()||c.name.length>60||typeof c.icon!=='string'||c.icon.length>15||!Number.isInteger(c.pct)||c.pct<0||c.pct>100||!['protected','flex'].includes(c.kind)||!Number.isSafeInteger(c.target)||c.target<0||c.target>1e11||!Number.isInteger(c.due)||c.due<0||c.due>31)throw Error('Неправильна категорія');seen.add(c.id);sum+=c.pct}if(sum!==100)throw Error('Частки категорій мають становити 100%');}
+   if(!o.wallets.business.categories.some(c=>c.id==='owner'))throw Error('Немає категорії «Виплати собі»');
+   const b={personal:{},business:{}};for(const w of ['personal','business'])for(const c of o.wallets[w].categories)b[w][c.id]=0;
+   const exists=(w,k)=>Object.prototype.hasOwnProperty.call(b[w],k);
+   for(const t of o.transactions){if(!t||!['income','expense','move','owner'].includes(t.type)||!Number.isSafeInteger(t.cents)||t.cents<=0||t.cents>1e11||!/^\d{4}-\d{2}-\d{2}$/.test(t.date)||typeof t.note!=='string'||t.note.length>250||typeof t.id!=='string')throw Error('Неправильна операція');
+      if(t.type==='income'){if(!['personal','business'].includes(t.wallet)||!Array.isArray(t.allocations)||t.allocations.reduce((s,a)=>s+a.cents,0)!==t.cents)throw Error('Помилка розподілу доходу');for(const a of t.allocations){if(!exists(t.wallet,a.id)||!Number.isSafeInteger(a.cents)||a.cents<0)throw Error('Помилка категорії надходження');b[t.wallet][a.id]+=a.cents}}
+      if(t.type==='expense'){if(!['personal','business'].includes(t.wallet)||!exists(t.wallet,t.category))throw Error('Категорія витрат відсутня');b[t.wallet][t.category]-=t.cents}
+      if(t.type==='move'){if(!['personal','business'].includes(t.wallet)||!exists(t.wallet,t.from)||!exists(t.wallet,t.to)||t.from===t.to)throw Error('Невірне переміщення');b[t.wallet][t.from]-=t.cents;b[t.wallet][t.to]+=t.cents}
+      if(t.type==='owner'){if(!Array.isArray(t.allocations)||t.allocations.reduce((s,a)=>s+a.cents,0)!==t.cents)throw Error('Помилка переказу собі');b.business.owner-=t.cents;for(const a of t.allocations){if(!exists('personal',a.id)||!Number.isSafeInteger(a.cents)||a.cents<0)throw Error('Помилка особистої категорії');b.personal[a.id]+=a.cents}}
+      if(Object.values(b.personal).some(n=>n<0)||Object.values(b.business).some(n=>n<0))throw Error('Операції перевищують доступні кошти');
+   }
+   window.SOLPlanner.validatePlanner(o);
+   window.SOLReminders.validateSettings(o);
+ }
+ // SOL Wallet 4.0: monthly obligations and outstanding debts use the existing encrypted ledger.
+ const P=window.SOLPlanner;
+ const R=window.SOLReminders;
+ const planner=()=>{R.ensureSettings(state);return state.planner};
+ function mutatePlanner(update){
+   const candidate=clone(state);P.ensurePlanner(candidate);
+   update(candidate);
+   validate(candidate);
+   state=candidate;save();render();
+ }
+ const itemById=(kind,id)=>planner()[kind==='bill'?'bills':'debts'].find(x=>x.id===id);
+ const itemLabel=(kind,id)=>itemById(kind,id)?.name||'—';
+ function euroRequired(v,label){const amount=parseEuro(v);if(!Number.isSafeInteger(amount)||amount<=0||amount>1e11)throw Error(`Перевір поле «${label}» — потрібна сума понад 0 €`);return amount}
+ function requiredMonth(v){if(!P.isMonth(v))throw Error('Вкажи правильний місяць початку');return v}
+ function requiredPlanDay(v){const n=Number(v);if(!Number.isInteger(n)||n<1||n>31)throw Error('День платежу має бути від 1 до 31');return n}
+ function validPlanDate(v){if(!P.isDate(v))throw Error('Некоректна дата платежу');return v}
+ const periodDay=()=>localDate();
+ const reminderRows=()=>R.upcoming(state,periodDay(),{wallet:ui.wallet});
+ function plannerForecast(){return P.forecast(state,ui.wallet,balances()[ui.wallet],periodDay())}
+ const relativeLabel=(date,today)=>{const diff=P.diffDays(date,today);return diff===0?'Сьогодні':diff<0?`Прострочено ${-diff} дн.`:diff===1?'Завтра':`Через ${diff} дн.`};
+ const statusLabel=status=>({paid:'Оплачено',settled:'Борг погашено',partial:'Частково',overdue:'Прострочено',today:'Сьогодні',soon:'Незабаром',upcoming:'Заплановано'})[status]||'Заплановано';
+ const monthLabel=m=>new Intl.DateTimeFormat('uk-UA',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(m+'-01T12:00:00Z'));
+ function forecastSummaryPanel(){
+   const f=plannerForecast(),dateLabel=f.chosen?`до ${fmtDate(f.until)} (дата наступного доходу)`:`на 30 днів · до ${fmtDate(f.until)}`;
+   return `<section class="panel plan-quick"><div class="plan-quick-head"><div><div class="eyebrow">ФІНАНСОВИЙ КОМПАС</div><h3>Можна витратити без порушення плану</h3><p>Розрахунок ${dateLabel}. Заплановані платежі не списуються автоматично.</p></div><button class="btn soft small" data-page="forecast">Детальний прогноз →</button></div><div class="plan-quick-stats"><div><small>Доступно для гнучких покупок</small><strong class="${f.unfundedCents?'warn-text':'good-text'}">${money(f.safeFlexCents)}</strong></div><div><small>Ще потрібно за графіком</small><strong>${money(f.dueCents)}</strong></div><div><small>Не вистачає в конвертах</small><strong class="${f.unfundedCents?'danger-text':''}">${money(f.unfundedCents)}</strong></div></div></section>`;
+ }
+ function planItemRow(entry){
+   const bal=balances()[ui.wallet][entry.categoryId]||0,cat=category(ui.wallet,entry.categoryId),status=entry.status;
+   const label=relativeLabel(entry.date,periodDay()),enough=bal>=entry.unpaidCents;
+   return `<article class="due-row"><div class="due-icon">${entry.kind==='debt'?'📋':'📅'}</div><div class="due-main"><div class="due-title">${esc(entry.name)} <span class="status-chip ${status}">${statusLabel(status)}</span></div><p>${fmtDate(entry.date)} · ${esc(cat?.name||'—')} · ${esc(label)}</p><small>За графіком: ${money(entry.dueCents)}${entry.paidCents?` · сплачено: ${money(entry.paidCents)}`:''}</small></div><div class="due-end"><strong class="mono">${money(entry.unpaidCents)}</strong>${entry.unpaidCents?`<div class="due-actions"><button class="btn small ${enough?'primary':'ghost'}" data-record-payment="${esc(entry.kind)}" data-plan-id="${esc(entry.id)}" data-period="${esc(entry.period)}">Записати оплату</button><button class="btn small ghost" data-link-payment="${esc(entry.kind)}" data-plan-id="${esc(entry.id)}" data-period="${esc(entry.period)}" title="Використати вже записану витрату">Зв’язати</button></div>`:'<small class="good-text">Залишок 0 €</small>'}</div></article>`;
+ }
+ function plannerCalendar(){
+   const w=ui.wallet,m=ui.plannerMonth,today=periodDay(),entries=P.monthEntries(state,w,m,today),total=entries.reduce((s,e)=>s+e.dueCents,0),paid=entries.reduce((s,e)=>s+Math.min(e.dueCents,e.paidCents),0);
+   const startWeek=(new Date(m+'-01T00:00:00Z').getUTCDay()+6)%7;
+   const byDay=Object.fromEntries(entries.map(e=>[+e.date.slice(-2),[]]));for(const e of entries)byDay[+e.date.slice(-2)].push(e);
+   let dayCells='';for(let n=0;n<startWeek;n++)dayCells+='<div class="day-cell blank" aria-hidden="true"></div>';
+   for(let d=1;d<=P.dayCount(m);d++){
+     const date=P.dueDate(m,d),list=byDay[d]||[];
+     dayCells+=`<div class="day-cell ${date===today?'today':''} ${list.length?'has-due':''}" title="${list.length?esc(list.map(x=>x.name+' — '+money(x.unpaidCents)).join('; ')):''}"><span class="date-num">${d}</span>${list.length?`<span class="day-count">${list.length} ${list.length===1?'платіж':'платежі'}</span>`:''}${list.slice(0,2).map(e=>`<div class="day-dot ${e.status}"></div>`).join('')}</div>`;
+   }
+   const f=plannerForecast(),overduePrior=f.entries.filter(e=>e.date<today&&e.period!==m);
+   const prior=overduePrior.length?`<div class="notice">⚠️ <div><b>Є неоплачені попередні платежі:</b> ${overduePrior.length} на ${money(overduePrior.reduce((s,x)=>s+x.unpaidCents,0))}. Вони враховані в прогнозі (за останні 12 календарних місяців).</div></div>`:'';
+   return `<div class="intro"><div><h3>Календар платежів</h3><p>Оренда, комунальні, підписки, рахунки та борги. Нічого не сплачується автоматично.</p></div><div class="actions"><button class="btn primary" data-action="newBill">＋ Новий платіж</button><button class="btn" data-action="newDebt">＋ Новий борг</button></div></div>${prior}<div class="report-stats"><div class="report-stat"><small>Усього за місяць</small><strong>${money(total)}</strong></div><div class="report-stat"><small>Підтверджено оплату</small><strong class="good-text">${money(paid)}</strong></div><div class="report-stat"><small>Ще за графіком</small><strong class="${total-paid>0?'amber-text':''}">${money(Math.max(0,total-paid))}</strong></div><div class="report-stat"><small>Платежів у місяці</small><strong>${entries.length}</strong></div></div><section class="panel"><div class="planner-calendar-head"><h3>${esc(monthLabel(m))}</h3><div class="planner-calendar-nav"><button class="btn small ghost" data-month-shift="-1" aria-label="Попередній місяць">←</button><input class="field" type="month" id="plannerMonth" value="${esc(m)}" aria-label="Місяць календаря"><button class="btn small ghost" data-month-shift="1" aria-label="Наступний місяць">→</button></div></div><div class="weekday-grid">${['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(x=>`<div>${x}</div>`).join('')}</div><div class="calendar-grid">${dayCells}</div></section><section class="panel" style="margin-top:17px">${head('Платежі цього місяця',`${entries.length} запланованих операцій`,`<button class="btn small ghost" data-page="forecast">Перейти до прогнозу →</button>`)}<div class="panel-body due-list">${entries.length?entries.map(planItemRow).join(''):`<div class="empty"><div class="big">📅</div><strong>Платежів поки немає</strong>Додай обов’язкову суму, дату і конверт. Потім побачиш її тут.</div>`}</div></section><section class="panel" style="margin-top:17px">${head('Мої регулярні та разові платежі','Списки зберігаються лише в зашифрованому гаманці')}<div class="panel-body">${planner().bills.filter(e=>e.wallet===w).length?planner().bills.filter(e=>e.wallet===w).map(b=>`<div class="plan-management"><div><strong>${esc(b.name)}</strong><p>${money(b.cents)} · ${b.frequency==='monthly'?`${b.day} число кожного місяця з ${esc(b.startMonth)}`:`одноразово ${fmtDate(b.dueDate)}`} · ${esc(category(w,b.categoryId)?.name||'—')} ${b.active?'':'· ⏸ Призупинено'}</p></div><div class="actions"><button class="btn small ghost" data-edit-plan="bill" data-plan-id="${esc(b.id)}">Змінити</button><button class="btn small ghost" data-toggle-plan="bill" data-plan-id="${esc(b.id)}">${b.active?'Призупинити':'Відновити'}</button></div></div>`).join(''):'<div class="empty">Поки що немає збережених платежів.</div>'}</div></section>`;
+ }
+ function debtBoard(){
+   const w=ui.wallet,debts=planner().debts.filter(d=>d.wallet===w);
+   const amount=debts.reduce((s,d)=>s+P.debtBalance(state,d),0);
+   const paid=debts.reduce((s,d)=>s+P.paidDebt(state,d.id),0);
+   const original=debts.reduce((s,d)=>s+d.principalCents,0);
+   return `<div class="intro"><div><h3>Контроль боргів</h3><p>Внось фактичний залишок кожного боргу і записуй погашення окремими витратами.</p></div><div class="actions"><button class="btn primary" data-action="newDebt">＋ Додати борг</button><button class="btn" data-page="calendar">📅 Графік</button></div></div><div class="notice neutral">🧾 <div>Тут вводиться <strong>залишок боргу на момент початку обліку</strong>, а не вся початкова сума за договором. Відсотки, штрафи та зміни вимог кредитора система не вгадує. Якщо сума змінилася, редагуй її після перевірки документів.</div></div><div class="report-stats"><div class="report-stat"><small>Залишок боргів</small><strong class="amber-text">${money(amount)}</strong></div><div class="report-stat"><small>Погашено в SOL</small><strong class="good-text">${money(paid)}</strong></div><div class="report-stat"><small>Початковий облік</small><strong>${money(original)}</strong></div><div class="report-stat"><small>Боргів у списку</small><strong>${debts.length}</strong></div></div><div class="debt-grid">${debts.length?debts.map(d=>{
+     const rest=P.debtBalance(state,d),paid=P.paidDebt(state,d.id),progress=Math.max(0,Math.min(100,Math.round(100*paid/d.principalCents)));
+     return `<section class="debt-card"><div class="debt-header"><span>📋 ${esc(d.name)}</span><span class="status-chip ${rest===0?'paid':d.active?'upcoming':'partial'}">${rest===0?'Погашено':d.active?'За графіком':'Пауза'}</span></div><div class="debt-amount mono">${money(rest)}</div><div class="debt-secondary">Залишилося · від ${money(d.principalCents)}</div><div class="track"><span style="width:${progress}%"></span></div><div class="debt-progress"><span>Погашено ${money(paid)}</span><span>${progress}%</span></div><p class="debt-details">Щомісячно: ${money(d.paymentCents)} · ${d.day}-го числа · ${esc(category(w,d.categoryId)?.name||'—')}${d.reference?` · № ${esc(d.reference)}`:''}</p><div class="actions"><button class="btn primary small" data-debt-quickpay="${esc(d.id)}" ${!rest?'disabled':''}>＋ Погасити</button><button class="btn small ghost" data-edit-plan="debt" data-plan-id="${esc(d.id)}">Змінити</button><button class="btn small ghost" data-toggle-plan="debt" data-plan-id="${esc(d.id)}">${d.active?'Пауза':'Відновити'}</button></div></section>`;
+   }).join(''):`<section class="panel"><div class="empty"><div class="big">🌱</div><strong>Боргів ще не додано</strong>Це нормально: внеси лише ті зобов’язання, суму яких підтвердив. Приклади не стають реальними боргами.</div></section>`}</div>`;
+ }
+ function forecastBoard(){
+   const w=ui.wallet,f=plannerForecast(),settings=planner().settings[w],label=f.chosen?`до наступного надходження ${fmtDate(f.until)}`:`на наступні 30 днів до ${fmtDate(f.until)}`;
+   const list=f.entries;
+   const dayRows=list.map(e=>`<div class="forecast-line"><div><b>${esc(e.name)}</b><small>${fmtDate(e.date)} · ${esc(category(w,e.categoryId)?.name||'—')} ${e.date<periodDay()?'· Прострочено':''}</small></div><strong class="mono">−${money(e.unpaidCents)}</strong></div>`).join('');
+   const cats=getCats(w).filter(c=>f.dueByCat[c.id]>0);
+   return `<div class="intro"><div><h3>Прогноз до наступного надходження</h3><p>Якщо не додав дату майбутнього доходу, розрахунок охоплює 30 днів.</p></div><button class="btn" data-page="calendar">📅 Календар</button></div><section class="panel"><div class="panel-body"><form id="forecastForm"><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="nextIncomeDate">Дата наступного доходу</label><input class="field" type="date" id="nextIncomeDate" value="${esc(settings.nextIncomeDate)}"><small>Залиш порожнім, якщо дата невідома. До 366 днів уперед.</small></div><div class="form-block"><label class="fieldlabel" for="expectedIncome">Очікувана сума, € (лише довідка)</label><input class="field" type="number" id="expectedIncome" min="0" max="100000000" step="0.01" inputmode="decimal" value="${euroInput(settings.expectedIncomeCents)}"><small>Цю суму <strong>не додаємо</strong> до балансу, доки не надійде.</small></div></div><button class="btn primary" type="submit">Зберегти прогноз</button></form></div></section><div class="forecast-feature"><div class="forecast-hero"><small>Безпечний ліміт на гнучкі витрати</small><strong class="mono">${money(f.safeFlexCents)}</strong><p>З того, що вже є в конвертах, після врахування майбутніх рахунків і нестачі в зарезервованих категоріях</p></div><div class="forecast-tiles"><div><small>Зараз записано у гаманці</small><b>${money(f.balance)}</b></div><div><small>Ще сплатити ${label}</small><b>${money(f.dueCents)}</b></div><div><small>Можливий залишок після оплат</small><b class="${f.afterCents<0?'danger-text':'good-text'}">${money(f.afterCents)}</b></div><div><small>Нестача по цільових конвертах</small><b class="${f.unfundedCents?'danger-text':''}">${money(f.unfundedCents)}</b></div></div></div>${f.unfundedCents?`<div class="notice">⚠️ <div>Не вистачає <b>${money(f.unfundedCents)}</b> на платежі у визначених конвертах. Перевір суми, перенеси гроші вручну або заплануй додаткове надходження.</div></div>`:`<div class="notice neutral">✅ <div>За внесеними сумами заплановані платежі покриті відповідними конвертами. Це <strong>прогноз</strong>, а не банківська гарантія.</div></div>`}<section class="panel"><div class="panel-body"><h3>Планові списання ${label}</h3><p class="muted">Тільки записані зобов’язання. Не включено непередбачені щоденні покупки, автоматичні банківські операції чи фактичні податки без твого запису. Прострочені з останніх 12 місяців враховано.</p>${list.length?dayRows:'<div class="empty">Неоплачених платежів на цей період немає.</div>'}</div></section><section class="panel" style="margin-top:17px"><div class="panel-body"><h3>Які конверти потрібні для оплат</h3>${cats.length?cats.map(c=>{const bal=balances()[w][c.id],need=f.dueByCat[c.id];return `<div class="forecast-line"><div><b>${esc(c.icon)} ${esc(c.name)}</b><small>Є ${money(bal)} ${need>bal?'· потрібне поповнення':'· вистачає'}</small></div><strong>${money(need)}</strong></div>`}).join(''):'<div class="empty">Поки що немає сум до оплати.</div>'}</div></section><div class="notice neutral" style="margin-top:17px">💡 <div>Очікуване надходження ${money(settings.expectedIncomeCents)} <strong>не включено</strong> до цих цифр. Інструмент рахує лише твої записи: він не читає банк і не відправляє платежі.</div></div>`;
+ }
+ function reminderQuickPanel(){
+   const stats=R.summary(reminderRows());
+   if(!stats.total)return `<div class="notice neutral" style="margin-top:14px">🔔 <div>У цьому гаманці немає неоплачених прострочених або найближчих платежів. <button class="btn small ghost" data-page="reminders">Нагадування →</button></div></div>`;
+   return `<section class="panel reminder-highlight"><div class="panel-body"><div class="reminder-head"><div><div class="eyebrow">🔔 КОНТРОЛЬ ПЛАТЕЖІВ</div><h3>${stats.overdue?`⚠️ Прострочено: ${stats.overdue}`:`Незабаром потрібно сплатити: ${stats.total}`}</h3><p>${stats.overdue?`Прострочених зобов’язань: ${stats.overdue}. `:''}Неоплачено загалом ${money(stats.cents)} (за внесеними планами).</p></div><button class="btn small soft" data-page="reminders">Подивитися →</button></div></div></section>`;
+ }
+ function reminderBoard(){
+   const all=reminderRows(),stats=R.summary(all),settings=R.ensureSettings(state),permission=window.SOLReminderNotifier?.permission?.()||'unsupported';
+   const desc=({granted:'Дозволено в цьому браузері',denied:'Заблоковано в налаштуваннях браузера',default:'Дозвіл ще не надано',unsupported:'Недоступно у цьому браузері або без HTTPS'})[permission]||'Недоступно';
+   return `<div class="intro"><div><h3>🔔 Нагадування про платежі</h3><p>Прострочені, сьогоднішні й найближчі платежі — для ${ui.wallet==='personal'?'сімейного':'бізнесового'} гаманця. Інформація зберігається всередині захищеного сховища.</p></div><div class="actions"><button class="btn" data-page="calendar">📅 Календар</button><button class="btn primary" data-action="newBill">＋ Платіж</button></div></div>
+   <div class="report-stats"><div class="report-stat"><small>Прострочено</small><strong class="${stats.overdue?'danger-text':''}">${stats.overdue}</strong></div><div class="report-stat"><small>Сьогодні</small><strong>${stats.today}</strong></div><div class="report-stat"><small>Найближчими днями</small><strong>${stats.soon}</strong></div><div class="report-stat"><small>Ще до оплати</small><strong>${money(stats.cents)}</strong></div></div>
+   <section class="panel"><div class="panel-body"><h3>На що звернути увагу</h3><p class="muted">Показуються лише непогашені суми, зафіксовані тобою. Списання грошей від нагадування не відбувається.</p><div class="due-list">${all.length?all.slice(0,60).map(planItemRow).join(''):`<div class="empty"><div class="big">✅</div><strong>Термінових платежів немає</strong>Налаштуй потрібний інтервал нижче або додай платіж у календар.</div>`}${all.length>60?`<p class="muted">Ще ${all.length-60} записів: перевір повний список у календарі або прогнозі.</p>`:''}</div></div></section>
+   <div class="reminder-settings-grid"><section class="panel"><div class="panel-body"><h3>⚙️ Правила нагадувань</h3><form id="reminderSettingsForm"><div class="form-block"><label for="daysBefore" class="fieldlabel">Нагадувати за скільки днів</label><select id="daysBefore" class="field">${R.DAY_OPTIONS.map(d=>`<option value="${d}" ${settings.daysBefore===d?'selected':''}>${d===0?'У день платежу':d===1?'За 1 день':`За ${d} днів`}</option>`).join('')}</select></div><button class="btn primary" type="submit">Зберегти інтервал</button></form><div class="divider-soft"></div><h4>Сповіщення браузера</h4><p class="muted">${esc(desc)}. Показуються без імен і сум, <strong>лише коли відкритий і розблокований застосунок</strong>. Немає фонових push-повідомлень.</p><div class="actions">${settings.browserAlerts?`<button class="btn" data-action="disableAlerts">Вимкнути повідомлення</button><button class="btn ghost" data-action="checkAlerts">Перевірити</button>`:`<button class="btn soft" data-action="enableAlerts" ${permission==='unsupported'||permission==='denied'?'disabled':''}>🔔 Увімкнути повідомлення</button>`}</div></div></section>
+   <section class="panel"><div class="panel-body"><h3>📲 Нагадування в календарі телефона</h3><p class="muted">Завантаж файл .ics, імпортуй його в особистий календар та дозволь календарю сповіщати. Так нагадування працюватимуть незалежно від SOL Wallet, за правилами самого календаря.</p><label class="gate-option calendar-detail-toggle"><input type="checkbox" id="icsDetails"> Додати назви та суми (НЕшифровані дані)</label><p class="muted">За замовчуванням календар отримає тільки загальне «Перевір платіж у SOL Wallet», без назви кредитора й суми. Події наступних 12 місяців, сигнал о 09:00 за ${settings.daysBefore} днів.</p><div class="actions"><button class="btn primary" data-action="icsWallet">Календар цього гаманця</button><button class="btn ghost" data-action="icsAll">Обидва гаманці</button></div></div></section></div>
+   <div class="notice neutral" style="margin-top:17px">💡 <div>Для <strong>автоматичних push-сповіщень із сервера</strong> (коли браузер повністю закритий) потрібна окрема інфраструктура й додатковий дозвіл. Ця версія їх не надсилає. Події .ics можуть синхронізуватися до зовнішнього календаря — врахуй конфіденційність.</div></div>`;
+ }
+ function saveReminderSettings(){
+   const daysBefore=Number(document.getElementById('daysBefore').value);
+   if(!R.DAY_OPTIONS.includes(daysBefore))throw Error('Некоректний інтервал');
+   mutatePlanner(s=>{R.ensureSettings(s).daysBefore=daysBefore});toast('Інтервал нагадувань збережено');
+ }
+ function enableAlerts(){
+   window.SOLReminderNotifier.request().then(permission=>{
+     if(permission!=='granted')throw Error('Браузер не дозволив сповіщення. Можна використати календар .ics');
+     mutatePlanner(s=>{R.ensureSettings(s).browserAlerts=true});toast('Увімкнено нагадування під час роботи застосунку');
+     window.SOLReminderNotifier.check();
+   }).catch(err=>toast(err.message||'Сповіщення недоступні',true));
+ }
+ function disableAlerts(){mutatePlanner(s=>{R.ensureSettings(s).browserAlerts=false});toast('Сповіщення цього застосунку вимкнено')}
+ function exportICS(allWallets){
+   const includeDetails=!!document.getElementById('icsDetails')?.checked;
+   if(includeDetails&&!confirm('Цей календар міститиме назви платежів і суми у НЕзашифрованому вигляді. Імпортувати лише в приватний календар. Продовжити?'))return;
+   const wallets=allWallets?['personal','business']:[ui.wallet];
+   const file=R.toICS(state,periodDay(),{wallets,includeDetails,months:12});
+   if(!file.count)throw Error('На найближчі 12 місяців немає незакритих платежів для експорту');
+   download(`SOL_Wallet_reminders_${allWallets?'all':ui.wallet}_${localDate()}.ics`,file.text,'text/calendar;charset=utf-8');
+   toast(`Календар підготовлено: ${file.count} подій. Для сповіщень імпортуй файл у свій календар`);
+ }
+ function saveCloudSetup(){
+   const url=document.getElementById('cloudUrl').value.trim().replace(/\/+$/,'');
+   const key=document.getElementById('cloudKey').value.trim();
+   const validHost=/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(url);
+   const validKey=(/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(key))||(()=>{try{const parts=key.split('.');const obj=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));return parts.length===3&&obj.role==='anon'}catch(_){return false}})();
+   if(!validHost||!validKey)throw Error('Потрібні адреса https://PROJECT.supabase.co та публічний (НЕ секретний) ключ');
+   if(!confirm('Підключення до власного Supabase-проєкту. У хмару потраплять лише зашифровані записи. Збережи резервну копію та продовжити?'))return;
+   localStorage.removeItem('SOL_WALLET_V2_AUTH');localStorage.removeItem('SOL_WALLET_V2_CLOUD_REV');
+   localStorage.setItem('SOL_WALLET_V4_CLOUD_SETUP',JSON.stringify({supabaseUrl:url,publishableKey:key}));
+   toast('Налаштування хмари збережено. Перезапуск сторінки…');window.location.reload();
+ }
+ function clearCloudSetup(){
+   if(!confirm('Вимкнути підключення до хмари в цьому браузері? Зашифрований гаманець на пристрої залишиться.'))return;
+   localStorage.removeItem('SOL_WALLET_V4_CLOUD_SETUP');localStorage.removeItem('SOL_WALLET_V2_AUTH');localStorage.removeItem('SOL_WALLET_V2_CLOUD_REV');
+   window.location.reload();
+ }
+ function moreBoard(){return `<div class="intro"><div><h3>Усі інструменти</h3><p>Налаштування конвертів, історія, звітність і резервні копії.</p></div></div><div class="more-grid">${[['reminders','🔔','Нагадування','Платежі й календар телефона'],['history','≡','Журнал операцій','Записані доходи, витрати й перекази'],['rules','◈','Правила розподілу','Відсотки та місячні цілі'],['reports','▤','Звіти','Підсумки за місяць'],['backup','🔐','Дані та безпека','Шифрування, копії та відновлення']].map(([page,icon,title,sub])=>`<button class="more-link" data-page="${page}"><span>${icon}</span><strong>${title}</strong><small>${sub}</small><b>→</b></button>`).join('')}</div>`}
+ function categoryOptions(w,selected){return getCats(w).filter(c=>!(w==='business'&&c.id==='owner')).map(c=>`<option value="${esc(c.id)}" ${c.id===selected?'selected':''}>${esc(c.icon)} ${esc(c.name)}</option>`).join('')}
+ function planBillModal(idValue=''){
+   const w=ui.wallet,p=itemById('bill',idValue),month=currentMonth(),record=p||{name:'',cents:0,frequency:'monthly',day:1,startMonth:month,dueDate:localDate(),categoryId:w==='personal'?'rent':'operations'};
+   openModal(p?'Редагувати платіж':'Додати платіж',"Сума та дата потрібні для календаря. Гроші списуються тільки після підтвердження оплати.",`<form id="billForm"><input type="hidden" id="planEditId" value="${esc(p?.id||'')}"><div class="form-block"><label class="fieldlabel" for="planName">За що платимо</label><input class="field" id="planName" required maxlength="90" placeholder="Оренда, електроенергія, підписка…" value="${esc(record.name)}"></div><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="billAmount">Сума, €</label><input type="number" class="field" id="billAmount" min="0.01" max="100000000" step="0.01" required inputmode="decimal" value="${record.cents?euroInput(record.cents):''}"></div><div class="form-block"><label class="fieldlabel" for="billCategory">З якого конверта</label><select class="field" id="billCategory">${categoryOptions(w,record.categoryId)}</select></div></div><div class="form-block"><label class="fieldlabel" for="billFrequency">Як часто</label><select class="field" id="billFrequency"><option value="monthly" ${record.frequency==='monthly'?'selected':''}>Щомісяця</option><option value="once" ${record.frequency==='once'?'selected':''}>Один раз</option></select></div><div id="billMonthly" ${record.frequency==='once'?'hidden':''}><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="billDay">Число місяця (1–31)</label><input class="field" type="number" id="billDay" min="1" max="31" value="${record.day}"></div><div class="form-block"><label class="fieldlabel" for="billStart">Початок з місяця</label><input class="field" type="month" id="billStart" value="${esc(record.startMonth)}"></div></div><small class="muted">Для 31-го числа в коротких місяцях використовується останній день місяця.</small></div><div id="billOnce" ${record.frequency==='monthly'?'hidden':''}><div class="form-block"><label class="fieldlabel" for="billDueDate">Дата оплати</label><input class="field" type="date" id="billDueDate" value="${esc(record.dueDate||localDate())}"></div></div>${formFooter(p?'Зберегти зміни':'Додати в календар')}</form>`);
+ }
+ function planDebtModal(idValue=''){
+   const w=ui.wallet,p=itemById('debt',idValue),record=p||{name:'',principalCents:0,paymentCents:0,day:10,startMonth:currentMonth(),categoryId:w==='personal'?'debts':'operations',reference:''};
+   openModal(p?'Редагувати борг':'Новий борг','Укажи залишок боргу зараз. Кожне погашення окремо зменшує суму в реєстрі та відповідному конверті.',`<form id="debtForm"><input type="hidden" id="planEditId" value="${esc(p?.id||'')}"><div class="form-block"><label class="fieldlabel" for="planName">Кредитор / назва боргу</label><input class="field" id="planName" maxlength="90" required placeholder="Наприклад, рахунок постачальника" value="${esc(record.name)}"></div><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="debtPrincipal">Залишок боргу на старті, €</label><input class="field" id="debtPrincipal" type="number" min="0.01" max="100000000" step="0.01" required inputmode="decimal" value="${record.principalCents?euroInput(record.principalCents):''}"></div><div class="form-block"><label class="fieldlabel" for="debtPayment">Щомісячний внесок, €</label><input class="field" id="debtPayment" type="number" min="0.01" max="100000000" step="0.01" required inputmode="decimal" value="${record.paymentCents?euroInput(record.paymentCents):''}"></div><div class="form-block"><label class="fieldlabel" for="debtDay">Число платежу</label><input class="field" type="number" id="debtDay" min="1" max="31" value="${record.day}"></div><div class="form-block"><label class="fieldlabel" for="debtStart">Початок платежів</label><input class="field" type="month" id="debtStart" value="${esc(record.startMonth)}"></div></div><div class="form-block"><label class="fieldlabel" for="debtCategory">Конверт погашення</label><select class="field" id="debtCategory">${categoryOptions(w,record.categoryId)}</select></div><div class="form-block"><label class="fieldlabel" for="debtReference">Номер справи / примітка (необов’язково)</label><input class="field" id="debtReference" maxlength="120" value="${esc(record.reference)}" placeholder="Не вводь дані банківських карток"></div>${formFooter(p?'Зберегти зміни':'Додати борг')}</form>`);
+ }
+ function saveBill(){
+   const wallet=ui.wallet,idValue=document.getElementById('planEditId').value,old=itemById('bill',idValue),frequency=document.getElementById('billFrequency').value;
+   if(!['monthly','once'].includes(frequency))throw Error('Некоректна періодичність');
+   const startMonth=frequency==='monthly'?requiredMonth(document.getElementById('billStart').value):document.getElementById('billDueDate').value.slice(0,7);
+   const due=frequency==='once'?validPlanDate(document.getElementById('billDueDate').value):'';
+   const newBill={id:old?.id||id(),wallet,name:document.getElementById('planName').value.trim(),cents:euroRequired(document.getElementById('billAmount').value,'Сума'),frequency,day:frequency==='monthly'?requiredPlanDay(document.getElementById('billDay').value):+due.slice(-2),startMonth,dueDate:due,categoryId:document.getElementById('billCategory').value,active:old?.active??true};
+   mutatePlanner(s=>{const items=s.planner.bills;if(old)items.splice(items.findIndex(x=>x.id===old.id),1,newBill);else items.push(newBill)});
+   closeModal();toast(old?'Рахунок оновлено':'Платіж додано в календар');
+ }
+ function saveDebt(){
+   const wallet=ui.wallet,idValue=document.getElementById('planEditId').value,old=itemById('debt',idValue);
+   const newDebt={id:old?.id||id(),wallet,name:document.getElementById('planName').value.trim(),principalCents:euroRequired(document.getElementById('debtPrincipal').value,'Залишок'),paymentCents:euroRequired(document.getElementById('debtPayment').value,'Внесок'),day:requiredPlanDay(document.getElementById('debtDay').value),startMonth:requiredMonth(document.getElementById('debtStart').value),categoryId:document.getElementById('debtCategory').value,active:old?.active??true,reference:document.getElementById('debtReference').value.trim()};
+   mutatePlanner(s=>{const items=s.planner.debts;if(old)items.splice(items.findIndex(x=>x.id===old.id),1,newDebt);else items.push(newDebt)});
+   closeModal();toast(old?'Борг оновлено':'Борг додано');
+ }
+ function saveForecast(){
+   const nextIncomeDate=document.getElementById('nextIncomeDate').value,expectedIncomeCents=parseEuro(document.getElementById('expectedIncome').value);
+   if(nextIncomeDate&&(!P.isDate(nextIncomeDate)||nextIncomeDate<=localDate()||P.diffDays(nextIncomeDate,localDate())>366))throw Error('Наступний дохід має бути в межах 366 днів від сьогодні. Або залиш поле порожнім.');
+   if(!Number.isSafeInteger(expectedIncomeCents)||expectedIncomeCents<0||expectedIncomeCents>1e11)throw Error('Перевір суму очікуваного доходу');
+   mutatePlanner(s=>{s.planner.settings[ui.wallet]={nextIncomeDate,expectedIncomeCents}});toast('Прогноз оновлено');
+ }
+ function togglePlan(kind,idValue){
+   const item=itemById(kind,idValue);if(!item||item.wallet!==ui.wallet)throw Error('Платіж не знайдено');
+   mutatePlanner(s=>{const x=s.planner[kind==='bill'?'bills':'debts'].find(x=>x.id===idValue);x.active=!x.active});toast(item.active?'Відновлено':'Призупинено');
+ }
+ function plannedEntry(kind,idValue,period){
+   if(!P.isMonth(period))throw Error('Некоректний місяць');
+   const entry=P.monthEntries(state,ui.wallet,period,periodDay()).find(x=>x.kind===kind&&x.id===idValue);
+   if(!entry)throw Error('Платіж відсутній у цьому місяці');return entry;
+ }
+ function recordPlanPayment(kind,idValue,period){
+   const entry=plannedEntry(kind,idValue,period);
+   const maxAmount=kind==='debt'?Math.min(entry.unpaidCents,P.debtBalance(state,itemById(kind,idValue))):entry.unpaidCents;
+   if(maxAmount<=0)throw Error('Цей платіж уже погашений або прив’язаний до витрати');
+   const b=balances()[ui.wallet][entry.categoryId]||0;
+   if(maxAmount>b)throw Error(`У конверті «${category(ui.wallet,entry.categoryId)?.name}» зараз лише ${money(b)}, а потрібно ${money(maxAmount)}. Поповни або перерозподіли гроші, потім запиши оплату.`);
+   if(!confirm(`Записати фактичну оплату ${money(maxAmount)} за «${entry.name}»?\nЦе зменшить баланс конверта. Якщо витрата вже записана — натисни «Зв’язати» замість повторного списання.`))return;
+   const t={id:id(),type:'expense',wallet:ui.wallet,category:entry.categoryId,cents:maxAmount,date:localDate(),note:'Оплата: '+entry.name.slice(0,160),occurrence:period};
+   t[kind==='bill'?'billId':'debtId']=idValue;
+   addTx(t);toast('Оплату записано та пов’язано з графіком');
+ }
+ function debtQuickPayment(idValue){
+   const debt=itemById('debt',idValue);if(!debt||debt.wallet!==ui.wallet)throw Error('Борг не знайдено');
+   const period=currentMonth(),entry=P.monthEntries(state,ui.wallet,period,periodDay()).find(x=>x.kind==='debt'&&x.id===idValue);
+   if(entry&&entry.unpaidCents>0){recordPlanPayment('debt',idValue,period);return}
+   const remaining=P.debtBalance(state,debt);if(!remaining)throw Error('Борг повністю погашено');
+   const amount=Math.min(remaining,debt.paymentCents),bal=balances()[ui.wallet][debt.categoryId];
+   if(amount>bal)throw Error(`У конверті недостатньо коштів: ${money(bal)}. Потрібно ${money(amount)}.`);
+   if(!confirm(`Записати додаткове погашення ${money(amount)} за боргом «${debt.name}»?`))return;
+   addTx({id:id(),type:'expense',wallet:ui.wallet,category:debt.categoryId,cents:amount,date:localDate(),note:'Додаткове погашення: '+debt.name,occurrence:period,debtId:debt.id});toast('Борг зменшено');
+ }
+ function linkPlanPayment(kind,idValue,period){
+   const entry=plannedEntry(kind,idValue,period),candidate=state.transactions.filter(t=>t.type==='expense'&&t.wallet===ui.wallet&&t.category===entry.categoryId&&t.date.slice(0,7)===period&&!t.billId&&!t.debtId&&t.cents<=entry.unpaidCents);
+   if(!candidate.length){openModal('Немає витрат для прив’язки','Якщо ти ще не записував оплату, повернися до календаря й вибери «Записати оплату».',`<div class="notice neutral">ℹ️ У цьому місяці немає вільної записаної витрати з відповідного конверта і сумою, яка не перевищує неоплачену частину рахунку.</div><div class="modal-actions"><button class="btn" data-close="1">Зрозуміло</button></div>`);return}
+   openModal('Прив’язати наявну витрату',`Не зніматимемо гроші вдруге. Обери вже записану витрату для «${entry.name}».`,`<form id="linkExpenseForm"><input type="hidden" id="linkKind" value="${esc(kind)}"><input type="hidden" id="linkPlanId" value="${esc(idValue)}"><input type="hidden" id="linkPeriod" value="${esc(period)}"><div class="form-block"><label class="fieldlabel" for="linkExpenseId">Вже записана витрата</label><select class="field" id="linkExpenseId">${candidate.map(t=>`<option value="${esc(t.id)}">${fmtDate(t.date)} · ${money(t.cents)} · ${esc(t.note||category(ui.wallet,t.category)?.name||'Витрата')}</option>`).join('')}</select></div><div class="notice neutral">✅ <span>Ця операція не змінить баланс. Вона лише зв’яже попередній запис із календарем / боргом.</span></div>${formFooter('Зв’язати без повторного списання')}</form>`);
+ }
+ function saveExpenseLink(){
+   const kind=document.getElementById('linkKind').value,idValue=document.getElementById('linkPlanId').value,period=document.getElementById('linkPeriod').value,txId=document.getElementById('linkExpenseId').value;
+   const entry=plannedEntry(kind,idValue,period),t=state.transactions.find(x=>x.id===txId);
+   if(!t||t.type!=='expense'||t.wallet!==ui.wallet||t.category!==entry.categoryId||t.billId||t.debtId||t.cents>entry.unpaidCents||t.date.slice(0,7)!==period)throw Error('Ця витрата більше не підходить для прив’язки');
+   mutatePlanner(s=>{const target=s.transactions.find(x=>x.id===txId);target[kind==='bill'?'billId':'debtId']=idValue;target.occurrence=period});closeModal();toast('Витрату прив’язано без повторного списання');
+ }
+
+ function toast(msg,error=false){const node=document.getElementById('toast');node.textContent=msg;node.classList.toggle('error',error);node.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.classList.remove('show'),3800)}
+ function render(){if(!unlocked)return;document.querySelectorAll('[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===ui.page));document.querySelectorAll('[data-wallet]').forEach(n=>n.classList.toggle('active',n.dataset.wallet===ui.wallet));
+   const meta={overview:['Мої гроші — мій план','Побач, де кожне євро, перш ніж його витратити.'],calendar:['Календар платежів','Заздалегідь знай дати, суми й конверти.'],reminders:['Нагадування про платежі','Прострочені, сьогоднішні та майбутні платежі.'],debts:['Мої борги','План погашення та реальний залишок.'],forecast:['Прогноз бюджету','Побач, що можна витратити до наступного доходу.'],more:['Налаштування та інструменти','Додаткові розділи SOL Wallet.'],history:['Рух коштів','Кожна операція має свою історію.'],rules:['Правила розподілу','Встанови свою схему — гроші самі розкладуться по конвертах.'],reports:['Фінансові звіти','Що прийшло, скільки витрачено та на що.'],backup:['Дані та безпека','Керуй резервними копіями та конфіденційністю.']}[ui.page]||['SOL Wallet',''];
+   document.getElementById('pageTitle').textContent=meta[0];document.getElementById('pageSubtitle').textContent=meta[1];
+   document.getElementById('content').innerHTML={overview:overview,calendar:plannerCalendar,debts:debtBoard,forecast:forecastBoard,reminders:reminderBoard,more:moreBoard,history:history,rules:rules,reports:reports,backup:backup}[ui.page]();
+   if(ui.page==='overview'){const el=document.getElementById('quickAmount');if(el)el.value=ui.preview;drawPreview()}
+ }
+ const head=(title,description,right='')=>`<div class="panel-head"><div><h3>${title}</h3><p>${description}</p></div>${right}</div>`;
+ const actions=()=>`<div class="actions"><button class="btn primary" data-action="income">＋ Надходження</button><button class="btn" data-action="expense">− Витрата</button><button class="btn" data-action="move">⇄ Перерозподілити</button>${ui.wallet==='business'?'<button class="btn soft" data-action="owner">↗ Виплатити собі</button>':''}</div>`;
+ function overview(){const b=balances(),w=ui.wallet,cats=getCats(w),sum=walletSum(b,w),protectedCents=cats.filter(c=>c.kind==='protected').reduce((s,c)=>s+b[w][c.id],0),flexCents=sum-protectedCents,md=monthData(w,currentMonth());const under=cats.filter(c=>c.kind==='protected'&&c.target>0&&md.funded[c.id]<c.target).sort((a,b)=>(a.due||32)-(b.due||32));
+   const notice=!storeAvailable?`<div class="notice">⚠️ <div>Цей браузер може не зберігати зміни. Збережіть резервну копію JSON після роботи.</div></div>`:under.length?`<div class="notice">⚠️ <div><strong>Ще потрібні гроші на обов'язкові платежі:</strong> ${under.slice(0,3).map(c=>esc(c.name)+' — '+money(Math.max(0,c.target-md.funded[c.id]))+(c.due?' (до '+c.due+' числа)':'')).join('; ')}. Це нестача за планом на поточний місяць, а не гроші на вільні покупки.</div></div>`:`<div class="notice neutral">🔐 <div><strong>Це віртуальні конверти.</strong> Гроші фізично залишаються у твоєму банку або готівці — застосунок лише допомагає їх не переплутати.</div></div>`;
+   const categories=cats.map((c,i)=>{const bal=b[w][c.id],f=md.funded[c.id],progress=c.target>0?Math.max(0,Math.min(100,100*f/c.target)):c.pct;return `<div class="envelope ${c.kind==='flex'?'flexbox':''}"><div class="symbol">${esc(c.icon)}</div><div><div class="ename" title="${esc(c.name)}">${esc(c.name)}</div><div class="einfo"><span>${c.pct}% надходження</span><span class="smalltag">${c.kind==='flex'?'Гнучкі':'Зарезервовано'}</span></div>${c.target>0?`<div class="track"><span style="width:${progress}%"></span></div><div class="target">Ціль цього місяця: ${money(c.target)} · розподілено: ${money(f)}${c.due?' · до '+c.due+' числа':''}</div>`:''}</div><div class="ebalance mono">${money(bal)}</div></div>`}).join('');
+   return `<div class="intro"><div><h3>${esc(state.wallets[w].name)}</h3><p>Додавай доходи, оплачуй рахунки і бач, скільки реально залишилося.</p></div>${actions()}</div>${notice}<section class="summary"><div class="hero"><div class="label">💳 Усього в конвертах</div><div class="amount mono">${money(sum)}</div><div class="extra">Зараховані доходи мінус записані витрати ${w==='business'?'та особисті перекази':''}</div></div><div class="metric green"><div class="label">✨ Гнучкі витрати</div><div class="amount mono">${money(flexCents)}</div><div class="hint">Діти, кафе, розваги ${w==='business'?'— або реклама':''}; детально нижче</div></div><div class="metric amber"><div class="label">🔒 Зарезервовано</div><div class="amount mono">${money(protectedCents)}</div><div class="hint">Оренда, рахунки, борги, резерви та інше</div></div></section>${reminderQuickPanel()}${forecastSummaryPanel()}<div class="section-grid"><section class="panel">${head('Мої конверти',`${cats.length} категорій · відкладена сума для кожної мети`,`<button class="btn ghost small" data-page="rules">⚙ Змінити %</button>`)}<div class="panel-body"><div class="envelope-list">${categories}</div></div></section><div><section class="panel preview-panel">${head('Калькулятор надходження','Подивись, куди підуть гроші, ще до зарахування')}<div class="preview-amount-wrap"><span class="currency">€</span><input type="number" id="quickAmount" inputmode="decimal" min="0.01" max="100000000" step="0.01" aria-label="Сума надходження" value="1000"></div><div id="quickPreview"></div><div class="preview-footer"><p>Приклад не змінює баланс. Кнопка нижче запише це як справжнє надходження.</p><button class="btn primary" data-action="quickIncome">＋ Зарахувати цю суму</button></div></section><section class="panel" style="margin-top:17px">${head('Останні операції','Останні 4 записи',`<button class="btn ghost small" data-page="history">Усі →</button>`)}${recent(w,4)}</section></div></div>`;
+ }
+ function drawPreview(){const target=document.getElementById('quickPreview');if(!target)return;const cents=parseEuro(ui.preview);if(!Number.isFinite(cents)||cents<=0){target.innerHTML='<div class="empty">Введи суму більше 0 €</div>';return}const cats=getCats(ui.wallet);const a=plannedAllocation(cents,ui.wallet);let rows='',bars='';for(let i=0;i<cats.length;i++){const c=cats[i],value=a[i].cents;if(value===0)continue;rows+=`<div class="preview-line"><span class="name">${esc(c.icon)} ${esc(c.name)} <b>${c.kind==='protected'&&c.target>0?'місячна ціль':c.pct+'%'}</b></span><span class="money mono">${money(value)}</span></div>`;bars+=`<span style="width:${100*value/cents}%;background:${COLORS[i%COLORS.length]}" title="${esc(c.name)}"></span>`}target.innerHTML=`<div class="preview-list"><div class="preview-bars">${bars}</div>${rows}</div>`;}
+ function recent(w,num){const tx=state.transactions.filter(t=>txSignedAmount(t,w)!==null).slice().reverse().slice(0,num);if(!tx.length)return `<div class="empty"><div class="big">🗂️</div><strong>Поки що немає операцій</strong>Перше надходження створить початок історії.</div>`;
+   return `<div class="activity-mini">${tx.map(t=>{const n=txSignedAmount(t,w),klass=n>0?'in':n<0?'out':'other';return `<div class="activity-item"><span class="symbol">${txIcon(t)}</span><div class="mid"><strong>${esc(desc(t,w))}</strong><small>${fmtDate(t.date)}</small></div><div class="money mono ${klass}">${n>0?'+':''}${money(n)}</div></div>`}).join('')}</div>`;
+ }
+ function history(){const w=ui.wallet,tx=state.transactions.filter(t=>txSignedAmount(t,w)!==null).slice().reverse();const latest=state.transactions.at(-1);return `<div class="intro"><div><h3>Журнал — ${w==='personal'?'сім’я':'бізнес'}</h3><p>Історія зберігається у зашифрованому сховищі.</p></div><div class="actions"><button class="btn primary" data-action="income">＋ Надходження</button><button class="btn" data-action="expense">− Витрата</button></div></div><section class="panel">${head('Усі транзакції',`${tx.length} записів`,latest?`<button class="btn ghost small" data-action="undo">↶ Скасувати останню дію</button>`:'')}<div class="table-wrap">${tx.length?`<table class="data-table"><thead><tr><th>Дата</th><th>Операція</th><th>Категорія / пояснення</th><th style="text-align:right">Сума</th></tr></thead><tbody>${tx.map(t=>{const n=txSignedAmount(t,w);const label={income:'Надходження',expense:'Витрата',move:'Переміщення',owner:'Виплата собі'}[t.type];const cat=t.type==='expense'?`<span class="muted">${esc(category(w,t.category)?.name||'—')}</span>`:'';return `<tr><td class="muted">${fmtDate(t.date)}</td><td>${label}</td><td>${esc(desc(t,w))} ${cat}</td><td class="${n>0?'amountplus':n<0?'amountminus':'amountneutral'} mono">${n>0?'+':''}${money(n)}</td></tr>`}).join('')}</tbody></table>`:'<div class="empty">Наразі немає операцій у цьому гаманці.</div>'}</div></section><div class="notice neutral" style="margin-top:17px">ℹ️ <div>Скасування видаляє лише <strong>останню операцію в загальному журналі</strong>. Для помилкових ранніх записів використай компенсувальний запис або резервну копію. Не записуй паролі чи номери карток у примітки.</div></div>`}
+ function rules(){const w=ui.wallet,cats=getCats(w),sum=cats.reduce((s,c)=>s+c.pct,0);return `<div class="intro"><div><h3>Як ділити кожні 100 €</h3><p>Спочатку закриваємо місячні обов’язкові цілі за датою платежу, залишок ділимо за відсотками. Старі записи не перераховуються.</p></div><button class="btn primary" data-action="income">Перевірити на доході →</button></div><div class="settings-info"><div class="mini"><b>${sum}%</b><small>Розподілено від кожного доходу</small></div><div class="mini"><b>${cats.length}</b><small>Категорій у гаманці</small></div><div class="mini"><b>${moneyCompact(10000)}</b><small>Зразок для налаштування часток</small></div></div><section class="panel">${head('Категорії та правила','Місячні обов’язкові цілі фінансуються першими (за днем платежу); потім решта надходжень ділиться за відсотками між іншими конвертами.')}
+   <div class="edit-rows" id="editRows">${cats.map(c=>`<div class="edit-row" data-edit-row="${esc(c.id)}"><div class="edit-icon">${esc(c.icon)}</div><div><label class="fieldlabel">Категорія</label><input class="field" data-edit="name" value="${esc(c.name)}" maxlength="60" aria-label="Назва категорії"></div><div><label class="fieldlabel">Частка %</label><input class="field" data-edit="pct" type="number" inputmode="numeric" min="0" max="100" step="1" value="${c.pct}"></div><div><label class="fieldlabel">Ціль €/міс.</label><input class="field" data-edit="target" type="number" inputmode="decimal" min="0" max="1000000" step="0.01" value="${euroInput(c.target)}"></div><div><label class="fieldlabel">Тип</label><select class="field" data-edit="kind"><option value="protected" ${c.kind==='protected'?'selected':''}>Резерв</option><option value="flex" ${c.kind==='flex'?'selected':''}>Гнучкі</option></select></div><div><label class="fieldlabel">До числа</label><input class="field" data-edit="due" type="number" inputmode="numeric" min="0" max="31" step="1" value="${c.due}"></div><button class="remove" data-remove-category="${esc(c.id)}" title="Видалити категорію" aria-label="Видалити ${esc(c.name)}" ${c.id==='owner'?'disabled':''}>×</button></div>`).join('')}</div><div class="edit-actions"><span class="ratio" id="ratio">Всього: ${sum}% із 100%</span><button class="btn ghost" data-action="addCategory">＋ Категорія</button><button class="btn primary" data-action="saveRules">Зберегти правила</button></div></section><div class="notice neutral" style="margin-top:17px">💡 <div><strong>Логіка:</strong> всі нові доходи розкладаються по зазначених відсотках. Обов'язкові конверти окремі від гнучких. Налаштуй реальні суми квартири, комунальних платежів і боргів — застосунок попередить, якщо місячні цілі ще не забезпечені.</div></div>`;}
+ function reports(){const w=ui.wallet,m=ui.month,tx=state.transactions.filter(t=>t.date.startsWith(m)),income=tx.reduce((s,t)=>s+(t.type==='income'&&t.wallet===w?t.cents:0)+(t.type==='owner'&&w==='personal'?t.cents:0),0),expense=tx.reduce((s,t)=>s+(t.type==='expense'&&t.wallet===w?t.cents:0),0),payout=w==='business'?tx.filter(t=>t.type==='owner').reduce((s,t)=>s+t.cents,0):0,md=monthData(w,m),max=Math.max(1,...Object.values(md.spent));const cats=getCats(w);
+   return `<div class="intro"><div><h3>Звіт за місяць</h3><p>Надходження, витрати, залишки та цілі.</p></div><div><label class="fieldlabel" for="reportMonth">Місяць</label><input id="reportMonth" class="field" type="month" value="${esc(m)}" style="max-width:190px"></div></div><div class="report-stats"><div class="report-stat"><small>＋ Надходження</small><strong>${money(income)}</strong></div><div class="report-stat"><small>− Витрати</small><strong>${money(expense)}</strong></div><div class="report-stat"><small>${w==='business'?'↗ Переказ собі':'↔ Чистий рух за місяць'}</small><strong>${money(w==='business'?payout:income-expense)}</strong></div><div class="report-stat"><small>📊 Зміна залишку</small><strong>${money(income-expense-payout)}</strong></div></div><section class="panel">${head('Витрати за категоріями','Фактичні витрати, внесені в застосунок')}<div class="panel-body">${cats.map(c=>`<div class="bar-row"><span class="t">${esc(c.icon)} ${esc(c.name)}</span><div class="bar"><span style="width:${md.spent[c.id]/max*100}%"></span></div><span class="v mono">${money(md.spent[c.id])}</span></div>`).join('')}</div></section><section class="panel" style="margin-top:17px">${head('Накопичено за місяць','Сума надходжень до категорії, з урахуванням переміщень')}<div class="table-wrap"><table class="data-table"><thead><tr><th>Конверт</th><th>Зараховано за місяць</th><th>Ціль за місяць</th><th>Потрібно ще</th></tr></thead><tbody>${cats.map(c=>`<tr><td>${esc(c.icon)} ${esc(c.name)}</td><td class="mono">${money(md.funded[c.id])}</td><td class="mono">${c.target?money(c.target):'—'}</td><td class="mono">${c.target?money(Math.max(0,c.target-md.funded[c.id])):'—'}</td></tr>`).join('')}</tbody></table></div></section>`;
+ }
+ function readiness(){
+   const protocol=location.protocol;
+   const safeHost=protocol==='https:'||((location.hostname==='localhost'||location.hostname==='127.0.0.1')&&protocol==='http:');
+   const origin=protocol==='file:'?'Локальний HTML-файл':location.origin;
+   const mode=safeHost?'HTTPS / локальний сервер':'Тільки локальний файл, функції PWA можуть бути обмежені';
+   let local=false;try{local=!!localStorage.getItem('SOL_WALLET_V2_ENCRYPTED')}catch(_){/* storage unavailable */}
+   return `<div class="info-card"><h4>🌐 Статус встановлення</h4><p><strong>Адреса:</strong> ${esc(origin)}<br><strong>Режим:</strong> ${esc(mode)}<br><strong>Шифрування:</strong> ${window.crypto?.subtle?'доступне':'недоступне'}<br><strong>Локальна зашифрована копія:</strong> ${local?'наявна':'відсутня'}</p><p>Файли v4/v5 на новій HTTPS-адресі не підхоплюють дані зі старого домену автоматично. Перед переходом завантаж зашифрований JSON зі старого гаманця, після чого віднови його тут.</p><p>Постійна адреса сама по собі не створює хмарної синхронізації. Без окремої налаштованої бази дані залишаються лише на цьому пристрої.</p></div>`;
+ }
+ function recoveryPanel(){
+   let history=[];
+   try{history=window.SOLVault.recoveryCopies()}catch(e){return `<div class="info-card"><h4>🛟 Аварійні копії</h4><p>${esc(e.message)}</p></div>`}
+   const reasons={'before-cloud-replace':'Копія з хмари перед заміною','before-local-replace':'Копія пристрою перед заміною','before-import':'Копія перед імпортом'};
+   return `<div class="info-card"><h4>🛟 Аварійні зашифровані копії</h4><p>Перед заміною іншою версією гаманець автоматично зберігає до п’яти останніх зашифрованих копій. Це не хмарне резервування: завантаж важливу копію окремим JSON-файлом.</p>${history.length?history.map(item=>`<div class="recovery-row"><span>${esc(reasons[item.reason]||'Аварійна копія')}<small>${esc(item.at.slice(0,19).replace('T',' '))} UTC</small></span><button class="btn small" data-recovery-index="${item.index}">Зберегти JSON</button></div>`).join(''):'<p class="muted">Поки немає аварійних копій — це нормально.</p>'}</div>`;
+ }
+ function backup(){return `<div class="intro"><div><h3>Твій захищений гаманець</h3><p>Усі записи шифруються на цьому пристрої. Синхронізація — тільки після підключення приватної хмари.</p></div><div class="actions"><button class="btn" data-action="lock">🔒 Заблокувати</button></div></div><div class="security-layout"><div class="info-card"><h4>🔐 Зашифрована копія</h4><p>Резервна копія захищена твоєю секретною фразою. Без неї неможливо відновити вміст.</p><div class="actions"><button class="btn primary" data-action="export">Завантажити захищений JSON</button><button class="btn" data-action="csv">CSV (НЕшифрований)</button></div></div><div class="info-card"><h4>📥 Відновлення</h4><p>Імпортуй захищений JSON v2/v3/v4/v5/v6 або стару копію v1. Старі дані будуть замінені після підтвердження.</p><button class="btn" data-action="import">Обрати JSON</button><input type="file" id="importFile" accept=".json,application/json" hidden></div><div class="info-card"><h4>🔒 Захист</h4><p>AES-256-GCM, ключ із секретної фрази (PBKDF2). Вміст не зберігається відкритим текстом. Не забудь фразу — технічного способу її відновити немає.</p><p id="syncInfo" class="muted" style="font-size:12px">${esc(window.SOLVault.statusText())}</p><button class="btn soft" data-action="cloud">☁️ Увійти / синхронізувати</button><button class="btn ghost" data-action="syncNow">Перевірити хмару</button></div><div class="info-card"><h4>☁️ Налаштування приватної хмари</h4><p>Власний проєкт Supabase з увімкненими Auth і RLS. До сховища йдуть лише зашифровані записи. <strong>Ніколи не вводь secret/service_role!</strong></p><form id="cloudSetupForm"><label class="fieldlabel" for="cloudUrl">URL проєкту Supabase</label><input class="field" type="url" id="cloudUrl" autocomplete="off" placeholder="https://PROJECT.supabase.co" value="${esc(window.SOL_CONFIG?.supabaseUrl||'')}" required><label class="fieldlabel" for="cloudKey" style="margin-top:9px">Публічний ключ (publishable/anon)</label><input class="field" type="text" id="cloudKey" autocomplete="off" maxlength="4096" value="${esc(window.SOL_CONFIG?.publishableKey||'')}" placeholder="sb_publishable_…" required><div class="actions" style="margin-top:12px"><button class="btn primary" type="submit">Зберегти хмару</button><button class="btn ghost" type="button" data-action="clearCloud">Вимкнути</button></div></form><p style="margin-top:9px">Для запуску потрібна таблиця із <code>supabase/sol_wallets_v4.sql</code>. Доступні лише свої записи за RLS.</p></div>${readiness()}${recoveryPanel()}<div class="info-card"><h4>🧹 Почати з нуля</h4><p>Прибирає доходи, витрати та правила всередині активного гаманця (запис залишається захищеним). Спочатку зроби копію.</p><button class="btn warn" data-action="reset">Очистити гаманець</button></div></div><div class="notice neutral" style="margin-top:17px">🧮 <div><strong>Податки:</strong> базові 25% бізнесу — демонстраційний резерв, а не німецький податковий розрахунок. Виплата собі (Privatentnahme) — це переміщення, а не автоматично бізнес-витрата. Зарезервовані кошти не заблоковані банком.</div></div>`;}
+ function openModal(title,subtitle,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalSubtitle').textContent=subtitle;document.getElementById('modalContent').innerHTML=html;document.getElementById('modalBackdrop').classList.add('open');document.body.style.overflow='hidden';const first=document.querySelector('#modalContent input, #modalContent select');if(first)first.focus()}
+ function closeModal(){document.getElementById('modalBackdrop').classList.remove('open');document.body.style.overflow=''}
+ const formAmount=(value='')=>`<div class="form-block"><label class="fieldlabel" for="modalAmount">Сума в євро</label><input class="field" id="modalAmount" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" placeholder="Наприклад, 1000" required value="${esc(value)}"></div>`;
+ const formDate=()=>`<div class="form-block"><label class="fieldlabel" for="modalDate">Дата</label><input class="field" type="date" id="modalDate" required value="${localDate()}"></div>`;
+ const formNote=p=>`<div class="form-block"><label class="fieldlabel" for="modalNote">Коментар (за бажанням)</label><input class="field" id="modalNote" maxlength="250" placeholder="${esc(p)}"></div>`;
+ const formFooter=text=>`<div class="modal-actions"><button class="btn ghost" type="button" data-close="1">Скасувати</button><button class="btn primary" type="submit">${text}</button></div>`;
+ function modalIncome(amt=''){const w=ui.wallet;openModal('Нове надходження',w==='business'?'Гроші клієнта або інший дохід бізнесу':'Особистий дохід або початковий залишок',`<form id="incomeForm">${formAmount(amt)}<div class="form-grid">${formDate()}<div class="form-block"><label class="fieldlabel" for="incomeSource">Джерело грошей</label><input class="field" id="incomeSource" maxlength="120" placeholder="Зарплата, клієнт, інше"></div></div><div class="fieldlabel">Автоматичний розподіл</div><div class="allocation-review" id="modalAllocation"></div><div class="notice neutral">ℹ️ <span>Це фіксація доходу у планувальнику. Реальних банківських переказів не відбувається.</span></div>${formFooter('＋ Зарахувати надходження')}</form>`);drawModalAllocation(w);}
+ function drawModalAllocation(w){const p=document.getElementById('modalAllocation');if(!p)return;const cents=parseEuro(document.getElementById('modalAmount')?.value);if(!Number.isFinite(cents)||cents<1){p.innerHTML='<span class="muted">Введи суму, щоб побачити розподіл.</span>';return}const cats=getCats(w),a=plannedAllocation(cents,w,document.getElementById("modalDate")?.value||localDate());p.innerHTML=cats.map((c,i)=>a[i].cents?`<div class="preview-line"><span class="name">${esc(c.icon)} ${esc(c.name)} · ${c.kind==='protected'&&c.target>0?'пріоритетна ціль':c.pct+'%'}</span><span class="money mono">${money(a[i].cents)}</span></div>`:'').join('')}
+ function modalExpense(){const w=ui.wallet,b=balances(),cats=getCats(w).filter(c=>!(w==='business'&&c.id==='owner'));openModal('Нова витрата',`Списуємо лише із зазначеного конверта (${w==='personal'?'сім’я':'бізнес'})`,`<form id="expenseForm"><div class="form-block"><label class="fieldlabel" for="modalCategory">Конверт</label><select class="field" id="modalCategory">${cats.map(c=>`<option value="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)} — ${money(b[w][c.id])}</option>`).join('')}</select><small id="modalAvailable">Доступно: ${money(b[w][cats[0].id])}</small></div>${formAmount()}<div class="form-grid">${formDate()}${formNote('Що куплено / оплачено')}</div>${formFooter('− Записати витрату')}</form>`)}
+ function modalMove(){const w=ui.wallet,cats=getCats(w),b=balances();openModal('Перерозподіл грошей','Переклади гроші між конвертами, якщо змінилися пріоритети.',`<form id="moveForm"><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="moveFrom">Звідки</label><select class="field" id="moveFrom">${cats.map(c=>`<option value="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)} (${money(b[w][c.id])})</option>`).join('')}</select></div><div class="form-block"><label class="fieldlabel" for="moveTo">Куди</label><select class="field" id="moveTo">${cats.map((c,i)=>`<option value="${esc(c.id)}" ${i===1?'selected':''}>${esc(c.icon)} ${esc(c.name)}</option>`).join('')}</select></div></div>${formAmount()}${formDate()}${formNote('Чому перерозподілили')}${formFooter('⇄ Перемістити кошти')}</form>`)}
+ function modalOwner(){const b=balances().business.owner;openModal('Виплата собі','З бізнесового конверта «Виплати собі» до сімейного бюджету.',`<form id="ownerForm"><div class="notice neutral">💼 <span>У бізнесі для виплати собі зараз є <strong>${money(b)}</strong>. Надходження до сімейного бюджету автоматично розподілиться за сімейними правилами. Для Einzelunternehmen це приватне вилучення (Privatentnahme), не витрата бізнесу.</span></div>${formAmount()}${formDate()}${formNote('Для сімейного бюджету')}<div class="fieldlabel">Отримає сімейний бюджет</div><div class="allocation-review" id="modalAllocation"></div>${formFooter('↗ Перевести в сімейний бюджет')}</form>`);drawModalAllocation('personal')}
+ function modalAddCategory(){openModal('Нова категорія','Відсоток нової категорії спершу дорівнює 0%.',`<form id="categoryForm"><div class="form-grid"><div class="form-block"><label class="fieldlabel" for="catIcon">Значок</label><input class="field" id="catIcon" maxlength="15" value="📦" required></div><div class="form-block"><label class="fieldlabel" for="catKind">Тип</label><select class="field" id="catKind"><option value="protected">Зарезервовано</option><option value="flex">Гнучкі витрати</option></select></div></div><div class="form-block"><label class="fieldlabel" for="catName">Назва</label><input class="field" id="catName" maxlength="60" required placeholder="Наприклад, подарунки"></div>${formFooter('＋ Додати категорію')}</form>`)}
+ function requireCents(){const c=parseEuro(document.getElementById('modalAmount').value);if(!Number.isSafeInteger(c)||c<1||c>1e11)throw Error('Введи правильну суму понад 0 €.') ;return c}
+ function requireDate(){const d=document.getElementById('modalDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||Number.isNaN(Date.parse(d)))throw Error('Перевір дату');return d}
+ function addIncome(){const cents=requireCents(),date=requireDate(),w=ui.wallet,source=document.getElementById('incomeSource').value.trim(),note=source.slice(0,250);addTx({id:id(),type:'income',wallet:w,cents,date,note,allocations:plannedAllocation(cents,w,date)});closeModal();toast(`Зараховано ${money(cents)} · гроші розподілено`)}
+ function addExpense(){const cents=requireCents(),date=requireDate(),w=ui.wallet,cat=document.getElementById('modalCategory').value,b=balances()[w][cat];if(cents>b)throw Error(`У конверті доступно ${money(b)}. Спершу перерозподіли гроші.`);addTx({id:id(),type:'expense',wallet:w,category:cat,cents,date,note:document.getElementById('modalNote').value.trim()});closeModal();toast(`Витрату ${money(cents)} записано`)}
+ function addMove(){const cents=requireCents(),date=requireDate(),w=ui.wallet,from=document.getElementById('moveFrom').value,to=document.getElementById('moveTo').value,b=balances()[w][from];if(from===to)throw Error('Вибери різні конверти');if(cents>b)throw Error(`У вихідному конверті є лише ${money(b)}`);addTx({id:id(),type:'move',wallet:w,from,to,cents,date,note:document.getElementById('modalNote').value.trim()});closeModal();toast('Гроші переміщено між конвертами')}
+ function addOwner(){const cents=requireCents(),date=requireDate(),b=balances().business.owner;if(cents>b)throw Error(`На виплату собі доступно ${money(b)}`);addTx({id:id(),type:'owner',cents,date,note:document.getElementById('modalNote').value.trim(),allocations:plannedAllocation(cents,'personal',date)});closeModal();toast(`${money(cents)} перенесено до сімейного бюджету`)}
+ function saveRules(){const els=Array.from(document.querySelectorAll('[data-edit-row]')),cats=[],ids=new Set();for(const el of els){const cat=category(ui.wallet,el.dataset.editRow),field=n=>el.querySelector(`[data-edit="${n}"]`).value;const name=field('name').trim(),pct=Number(field('pct')),target=parseEuro(field('target')),due=Number(field('due'));if(!name||name.length>60||!Number.isInteger(pct)||pct<0||pct>100||!Number.isSafeInteger(target)||target<0||target>1e11||!Number.isInteger(due)||due<0||due>31)throw Error('Перевір назви, відсотки, цілі та дати');const c={...cat,name,pct,target,due,kind:field('kind')};if(ids.has(c.id))throw Error('Дубль категорії');ids.add(c.id);cats.push(c)}const sum=cats.reduce((s,c)=>s+c.pct,0);if(sum!==100)throw Error(`Зараз ${sum}%. Потрібно рівно 100%`);state.wallets[ui.wallet].categories=cats;save();render();toast('Правила збережені · наступні доходи підуть за новою схемою')}
+ function updateRatio(){const all=[...document.querySelectorAll('[data-edit="pct"]')];if(!all.length)return;const sum=all.reduce((s,e)=>s+(Number(e.value)||0),0);const r=document.getElementById('ratio');if(r){r.textContent=`Всього: ${sum}% із 100%`;r.classList.toggle('error',sum!==100)}}
+ function removeCategory(k){const w=ui.wallet,b=balances()[w];if(k==='owner')throw Error('Категорію «Виплати собі» не можна видалити');if([...planner().bills,...planner().debts].some(x=>x.wallet===w&&x.categoryId===k))throw Error('Конверт використовується в календарі платежів або боргах. Спочатку зміни ці записи.');if(b[k]!==0)throw Error('Не можна видалити конверт з коштами');const used=state.transactions.some(t=>(t.wallet===w&&([t.category,t.from,t.to].includes(k)||t.allocations?.some(a=>a.id===k)))||(t.type==='owner'&&w==='personal'&&t.allocations?.some(a=>a.id===k)));if(used)throw Error('Категорія вже є в журналі. Збережи її для історії.');if(!confirm(`Видалити категорію «${category(w,k).name}»?`))return;state.wallets[w].categories=getCats(w).filter(c=>c.id!==k);save();render();toast('Категорію видалено')}
+ function addCategory(){const cats=getCats(ui.wallet);if(cats.length>=45)throw Error('Досягнуто межі у 45 категорій');const name=document.getElementById('catName').value.trim(),icon=document.getElementById('catIcon').value.trim()||'📦',kind=document.getElementById('catKind').value;if(!name)throw Error('Вкажи назву');cats.push({id:'custom_'+id(),name,icon,pct:0,kind,target:0,due:0});save();closeModal();render();toast('Категорію додано · тепер задай їй частку у %')}
+ function download(filename,text,type){const blob=new Blob([text],{type});const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+ function exportJson(){window.SOLVault.exportEncrypted().then(()=>toast('Зашифровану копію завантажено')).catch(e=>toast(e.message,true))}
+ function exportCsv(){const rows=[['Дата','Гаманець','Тип','Категорія / рух','Коментар','Сума EUR']];for(const w of ['personal','business'])for(const t of state.transactions){const n=txSignedAmount(t,w);if(n===null)continue;rows.push([t.date,w,t.type,t.type==='expense'?category(w,t.category)?.name||'':desc(t,w),t.note||'',(n/100).toFixed(2)])}const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n');download(`SOL_Wallet_operations_${localDate()}.csv`,'\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV з історією операцій підготовлено')}
+ async function importJson(file){if(!file)return;if(file.size>10_000_000)throw Error('Файл завеликий');
+   const imported=JSON.parse(await file.text());
+   if(imported?.format==='sol-wallet-vault'){
+     await window.SOLVault.restoreEncrypted(imported,validate);
+     toast('Захищену копію відновлено');return;
+   }
+   window.SOLPlanner.ensurePlanner(imported);validate(imported);
+   if(!confirm('Це НЕЗАШИФРОВАНА копія v1. Перенести її у захищений гаманець і замінити поточні дані?'))return;
+   state=imported;save();ui.page='overview';render();toast('Старі дані перенесено в захищений гаманець');
+ }
+ function reset(){if(!confirm('Це видалить усі доходи, витрати й змінені правила. Продовжити?'))return;if(!confirm('Остаточне підтвердження: повністю очистити SOL Wallet?'))return;state=clone(DEFAULT);save();ui.page='overview';ui.wallet='personal';render();toast('Застосунок очищено')}
+ function undo(){const t=state.transactions.at(-1);if(!t)return;if(!confirm(`Скасувати останній запис за ${fmtDate(t.date)} на ${money(t.cents)}?`))return;state.transactions.pop();save();render();toast('Останню операцію скасовано')}
+ function action(name){if(name==='income')modalIncome();if(name==='quickIncome'){const cents=parseEuro(ui.preview);if(!Number.isSafeInteger(cents)||cents<1)throw Error('Введи правильну суму');modalIncome((cents/100).toFixed(2))}if(name==='expense')modalExpense();if(name==='move')modalMove();if(name==='owner')modalOwner();if(name==='addCategory')modalAddCategory();if(name==='saveRules')saveRules();if(name==='export')exportJson();if(name==='csv')exportCsv();if(name==='import')document.getElementById('importFile').click();if(name==='reset')reset();if(name==='undo')undo();if(name==='lock')window.SOLVault.lock();if(name==='cloud')window.SOLVault.showCloud();if(name==='icsWallet')exportICS(false);if(name==='icsAll')exportICS(true);if(name==='enableAlerts')enableAlerts();if(name==='disableAlerts')disableAlerts();if(name==='checkAlerts')window.SOLReminderNotifier?.check().then(ok=>toast(ok?'Повідомлення показано':'Немає нового повідомлення або доступ недоступний'));if(name==='clearCloud')clearCloudSetup();if(name==='syncNow')window.SOLVault.syncNow().then(result=>{if(result==='synced')toast('☁️ Хмара синхронізована');}).catch(e=>toast(e.message,true));if(name==='newBill')planBillModal();if(name==='newDebt')planDebtModal();}
+ document.addEventListener('click',event=>{const el=event.target.closest('button');if(!el)return;try{if(el.dataset.recoveryIndex!==undefined){window.SOLVault.downloadRecovery(Number(el.dataset.recoveryIndex));return}if(el.dataset.page){ui.page=el.dataset.page;render();window.scrollTo(0,0);return}if(el.dataset.monthShift){const changed=P.monthShift(ui.plannerMonth,Number(el.dataset.monthShift));if(changed&&P.isMonth(changed)){ui.plannerMonth=changed;render()}return}if(el.dataset.recordPayment){recordPlanPayment(el.dataset.recordPayment,el.dataset.planId,el.dataset.period);return}if(el.dataset.linkPayment){linkPlanPayment(el.dataset.linkPayment,el.dataset.planId,el.dataset.period);return}if(el.dataset.editPlan){if(el.dataset.editPlan==='bill')planBillModal(el.dataset.planId);else planDebtModal(el.dataset.planId);return}if(el.dataset.togglePlan){togglePlan(el.dataset.togglePlan,el.dataset.planId);return}if(el.dataset.debtQuickpay){debtQuickPayment(el.dataset.debtQuickpay);return}if(el.dataset.wallet){ui.wallet=el.dataset.wallet;render();return}if(el.dataset.close){closeModal();return}if(el.dataset.action){action(el.dataset.action);return}if(el.dataset.removeCategory){removeCategory(el.dataset.removeCategory);return}}catch(e){toast(e.message||'Помилка',true)}});
+ document.getElementById('modalBackdrop').addEventListener('click',e=>{if(e.target.id==='modalBackdrop')closeModal()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+ document.addEventListener('input',e=>{if(e.target.id==='quickAmount'){ui.preview=e.target.value;drawPreview()}if(['modalAmount','modalDate'].includes(e.target.id)&&document.getElementById('modalAllocation'))drawModalAllocation(document.getElementById('incomeForm')?ui.wallet:'personal');if(e.target.dataset.edit==='pct')updateRatio()});
+ document.addEventListener('change',e=>{if(e.target.id==='reportMonth'){ui.month=e.target.value||currentMonth();render()}
+   if(e.target.id==='modalDate'&&document.getElementById('modalAllocation'))drawModalAllocation(document.getElementById('incomeForm')?ui.wallet:'personal');
+   if(e.target.id==='plannerMonth'&&P.isMonth(e.target.value)){ui.plannerMonth=e.target.value;render()}
+   if(e.target.id==='billFrequency'){document.getElementById('billMonthly').hidden=e.target.value!=='monthly';document.getElementById('billOnce').hidden=e.target.value!=='once'}
+   if(e.target.id==='modalCategory'){const bal=balances()[ui.wallet][e.target.value];const lab=document.getElementById('modalAvailable');if(lab)lab.textContent=`Доступно: ${money(bal)}`}
+   if(e.target.id==='importFile'){importJson(e.target.files[0]).catch(err=>toast(err.message||'Не вдалося імпортувати',true));e.target.value=''}});
+ document.addEventListener('submit',e=>{if(e.target.id==='reminderSettingsForm'){e.preventDefault();try{saveReminderSettings()}catch(err){toast(err.message,true)}return}if(e.target.id==='cloudSetupForm'){e.preventDefault();try{saveCloudSetup()}catch(err){toast(err.message,true)}return}if(!['incomeForm','expenseForm','moveForm','ownerForm','categoryForm','billForm','debtForm','forecastForm','linkExpenseForm'].includes(e.target.id))return;e.preventDefault();try{({incomeForm:addIncome,expenseForm:addExpense,moveForm:addMove,ownerForm:addOwner,categoryForm:addCategory,billForm:saveBill,debtForm:saveDebt,forecastForm:saveForecast,linkExpenseForm:saveExpenseLink})[e.target.id]()}catch(err){toast(err.message||'Помилка під час операції',true)}});
+ if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+ let installPrompt=null;
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;const btn=document.getElementById('installApp');if(btn)btn.hidden=false});
+ document.getElementById('installApp')?.addEventListener('click',async()=>{if(!installPrompt)return;const event=installPrompt;installPrompt=null;document.getElementById('installApp').hidden=true;try{await event.prompt()}catch(_){}});
+ window.addEventListener('appinstalled',()=>{installPrompt=null;const btn=document.getElementById('installApp');if(btn)btn.hidden=true});
+ window.SOLWalletAPI={
+   validate,
+   loadSnapshot(data){validate(data);state=window.SOLPlanner.ensurePlanner(clone(data));unlocked=true;ui.page='overview';ui.wallet='personal';ui.plannerMonth=currentMonth();R.ensureSettings(state);render();window.SOLReminderNotifier?.onUnlock(state)},
+   snapshot(){return clone(state)},
+   onLock(){window.SOLReminderNotifier?.onLock();state=clone(DEFAULT);unlocked=false;closeModal();document.getElementById('content').textContent=''},
+   legacyData(){try{const x=localStorage.getItem(KEY);if(!x)return null;const parsed=JSON.parse(x);validate(parsed);return parsed}catch(e){return null}},
+   removeLegacy(){localStorage.removeItem(KEY)},
+   afterRestore(data){validate(data);state=window.SOLPlanner.ensurePlanner(clone(data));R.ensureSettings(state);ui.page='overview';render();window.SOLReminderNotifier?.update(state)}
+ };
+ document.getElementById('lockWallet').addEventListener('click',()=>window.SOLVault.lock());
+ window.SOLVault.init(window.SOLWalletAPI);
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+SOL Wallet 6.0 - personal budget web application. Static frontend only. No personal financial records are included. Cloud sync is not configured. Never commit encryption passphrases or backup data.
