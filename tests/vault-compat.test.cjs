@@ -3,7 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const page=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const page=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8')+'\n'+fs.readFileSync(path.join(__dirname,'../vault.js'),'utf8');
 
 test('Existing wallet sign-in permits short historic phrases',()=>{
  assert.match(page,/exists\?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"'/);
