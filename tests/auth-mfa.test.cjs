@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto'),vm=require('node:vm'),path=require('node:path');
 const root=path.join(__dirname,'..');
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8')+'\n'+fs.readFileSync(path.join(root,'vault.js'),'utf8');
 const sql=fs.readFileSync(path.join(root,'supabase','sol_wallets_mfa.sql'),'utf8');
 test('Every inline script compiles and has a valid SHA-256 in the CSP, no unsafe eval',()=>{
  const policy=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
