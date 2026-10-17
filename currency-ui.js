@@ -26,7 +26,7 @@ function accountsBlock(s){
  const ab=C.accountBalances(s)[currency][wallet],items=C.ledger(s).accounts.filter(a=>a.wallet===wallet&&a.currency===currency);
  return '<section class="mc-card"><h3>💳 Картки та рахунки</h3><p class="mc-tip">Це назви для ручного обліку, не підключення до банку. Старі єврові операції залишаються в «Без прив’язки».</p>'
  + '<div class="mc-account"><span>Без прив’язки</span><strong>'+C.money(ab['']||0,currency)+'</strong></div>'
- + items.map(a=>'<div class="mc-account"><span>'+esc(a.name)+'</span><strong>'+C.money(ab[a.id]||0,currency)+'</strong></div>').join('')
+ + items.map(a=>'<div class="mc-account"><span>'+(a.kind==='cash'?'💵 ':'💳 ')+esc(a.name)+'</span><strong>'+C.money(ab[a.id]||0,currency)+'</strong></div>').join('')
  + '<button class="mc-action" data-mc-action="account">＋ Додати картку / рахунок</button></section>';
 }
 function sourceOptions(s,w,c){
@@ -60,7 +60,7 @@ function history(s){
   if(currency!=='UAH')continue;
   if(e.type==='uah_owner'&&wallet==='business')lines.push({date:e.date,n:-e.cents,text:'Виплата власнику',extra:e.note});
   if(e.type==='uah_owner'&&wallet==='personal')lines.push({date:e.date,n:e.cents,text:'Отримано від BMH',extra:e.note});
-  if(e.wallet===wallet&&['uah_income','uah_expense','uah_move'].includes(e.type))lines.push({date:e.date,n:e.type==='uah_income'?e.cents:e.type==='uah_expense'?-e.cents:0,text:e.type==='uah_income'?'Надходження':e.type==='uah_expense'?'Витрата':'Перерозподіл',extra:e.note});
+  if(e.wallet===wallet&&['uah_income','uah_expense','uah_move'].includes(e.type))lines.push({date:e.date,n:e.type==='uah_income'?e.cents:e.type==='uah_expense'?-e.cents:0,text:e.type==='uah_income'?'Надходження':e.type==='uah_expense'?'Витрата':'Перерозподіл',extra:e.note+(e.merchantCents?' · чек: '+C.money(e.merchantCents,'EUR'):'')});
  }
  return lines.slice(-40).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,17).map(x=>'<div class="mc-hist"><div>'+esc(x.text)+'<small>'+esc(x.date)+' · '+esc(x.extra||'—')+'</small></div><strong class="'+(x.n>0?'mc-positive':x.n<0?'mc-negative':'mc-zero')+'">'+(x.n>0?'+':'')+C.money(x.n,currency)+'</strong></div>').join('')||'<p class="mc-tip">Операцій у цій валюті ще немає.</p>';
 }
@@ -72,7 +72,7 @@ function formFor(s,b){
  const options='<div class="mc-actions">'+acts.map(k=>'<button type="button" class="mc-action'+(mode===k?' active':'')+'" data-mc-action="'+k+'">'+captions[k]+'</button>').join('')+'</div>';
  if(mode==='income'){
   intro='Отримані гроші будуть автоматично поділені між конвертами <b>'+labels[wallet]+' · '+labels[currency]+'</b>.';
-  form=sourceOptions(s,wallet,currency)+moneyField('amount','Надійшло, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','Куди надійшли')+'</div>'+noteField('Клієнт, виплата, стартовий баланс')+'<div class="mc-allocation" id="mcAllocation">Введи суму для попереднього розподілу.</div>';
+  form=sourceOptions(s,wallet,currency)+(wallet==='personal'?'<label class="mc-field">Тип сімейних коштів<select name="familyKind"><option value="regular">Звичайне сімейне надходження</option><option value="refund">Повернення моїх коштів</option><option value="opening">Початковий баланс (не новий дохід)</option></select></label>':'')+moneyField('amount','Надійшло, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','Куди надійшли')+'</div>'+noteField('Клієнт, виплата, стартовий баланс')+'<div class="mc-allocation" id="mcAllocation">Введи суму для попереднього розподілу.</div>';
  }else if(mode==='source'){
  intro='Джерело — лише шаблон. Реальні надходження зараховуються окремо через кнопку «Надходження». Не заповнюй чужих реквізитів чи номерів карток.';
  form='<label class="mc-field">Назва джерела<input name="sourceName" maxlength="90" required placeholder="Клієнт BMH, платформа, зарплата..."></label>'+
@@ -82,7 +82,9 @@ function formFor(s,b){
  '<div class="mc-note">💡 Шаблон не створює доходу та не змінює суму в гаманці. Сума тут — лише прогноз.</div>';
 }else if(mode==='expense'){
   intro='Записана витрата зменшить вибраний конверт <b>лише в '+currency+'</b>.';
-  form=catOptions(s,wallet,'category','З якого конверта',b)+moneyField('amount','Витрачено, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','З якого рахунку')+'</div>'+noteField('Що оплачено');
+  form=catOptions(s,wallet,'category','З якого конверта',b)+moneyField('amount','Фактично списано, '+currency)+'<div class="mc-two">'+dateField()+accountOptions(s,wallet,currency,'account','З якого рахунку')+'</div>'+
+ (wallet==='personal'?'<label class="mc-field">Тип витрати<select name="expenseKind"><option value="purchase">Покупка / оплата</option><option value="fee">Банківська комісія</option><option value="other">Інше</option></select></label>':'')+
+ (wallet==='personal'&&currency==='UAH'?'<label class="mc-field">Якщо ціна на чеку у € (довідково, необов’язково)<input name="merchantEUR" type="text" inputmode="decimal" autocomplete="off" placeholder="Наприклад, 12,00"></label><div class="mc-tip">У баланс списується тільки реальна сума у ₴. Євро з чека НЕ списуються вдруге.</div>':'')+noteField('Магазин / на що витрачено');
  }else if(mode==='move'){
   intro='Перерозподіл усередині '+currency+'. Загальна сума не змінюється.';
   form=catOptions(s,wallet,'from','З конверта',b)+partOptions(s,wallet,'to','До конверта')+moneyField('amount','Сума, '+currency)+dateField()+noteField();
@@ -97,7 +99,7 @@ function formFor(s,b){
   +dateField()+noteField('Обмін/банк/комісія за курсом')+'<div id="mcRate" class="mc-note">Фактичний курс визначиться з двох сум. Жодного автоматичного обміну немає.</div>';
  }else if(mode==='account'){
   intro='Додай коротку назву (наприклад, «ПриватБанк UAH»). Номер картки чи IBAN не потрібні.';
-  form='<label class="mc-field">Назва картки / рахунку<input name="accountName" maxlength="90" placeholder="Наприклад, ПриватБанк ₴" required></label>';
+  form='<label class="mc-field">Назва картки / рахунку<input name="accountName" maxlength="90" placeholder="Наприклад, Моя картка або Готівка €" required></label><label class="mc-field">Тип рахунку<select name="accountKind"><option value="card">Картка / банківський рахунок</option><option value="cash">Готівка</option><option value="other">Інший</option></select></label>';
  }else if(mode==='accountMove'){
   intro='Познач переміщення між двома картками тієї самої валюти. Конверти не зміняться.';
   const a=C.ledger(s).accounts.filter(x=>x.wallet===wallet&&x.currency===currency);
@@ -120,13 +122,14 @@ function render(message='',error=false){
  +'<div class="mc-controls"><div class="mc-tabs">'+['business','personal'].map(w=>'<button data-mc-wallet="'+w+'" class="'+(w===wallet?'active':'')+'">'+labels[w]+'</button>').join('')+'</div>'
  +'<div class="mc-tabs">'+['EUR','UAH'].map(c=>'<button data-mc-currency="'+c+'" class="'+(c===currency?'active':'')+'">'+labels[c]+'</button>').join('')+'</div></div>'
  +'<div class="mc-note">📌 '+labels[wallet]+' · '+labels[currency]+': <b>'+C.money(C.sumWallet(b,currency,wallet),currency)+'</b>. Євро й гривні не підсумовуються. Введені суми — ручний облік, не залишки банку.</div>'
- +'<div class="mc-content"><div><section class="mc-card"><h3>📦 Конверти · '+labels[currency]+'</h3>'+rows(s,now)+'</section>'
+  +(wallet==='personal'?(root.SOLFamilyBudget?.view(s,currency)||''):'')
+  +'<div class="mc-content"><div><section class="mc-card"><h3>📦 Конверти · '+labels[currency]+'</h3>'+rows(s,now)+'</section>'
  +'<div style="margin-top:13px">'+accountsBlock(s)+'</div><div style="margin-top:13px">'+sourcesBlock(s)+'</div></div><div>'+formFor(s,now)+'</div></div>'
  +'<section class="mc-card mc-history"><h3>🧾 Останні записи · '+labels[currency]+'</h3>'+history(s)+'</section>'
  +'<div class="mc-warning">⚠️ Для німецького бухгалтерського та податкового обліку валютні доходи потребують відповідного перерахунку й документів. Тут облік реальних сум за валютами, а не податкова декларація. Ця система не переказує коштів між банками.</div>'
  +'<div class="mc-actions"><button type="button" class="mc-action" data-mc-export="1">⬇️ Експорт усіх операцій (CSV · € + ₴)</button><button type="button" class="mc-action" data-mc-close="1">← Назад до SOL Wallet</button></div></div>';
  if(message){const el=d.getElementById('mcMessage');if(el){el.hidden=false;el.classList.toggle('error',error);el.textContent=message;}}
- updatePreview();
+  updatePreview();if(wallet==='personal')root.SOLFamilyBudget?.updatePreview(panel,s,currency);
 }
 function field(f,n){return f.elements.namedItem(n)?.value??'';}
 function updatePreview(){
@@ -157,17 +160,17 @@ function submit(f){
   },'✅ Джерело збережено. Надходження з нього ще не зараховане.');
  }
  if(mode==='income'){
-  const n=C.parse(field(f,'amount')),sourceId=field(f,'source');return write(s=>{
+  const n=C.parse(field(f,'amount')),sourceId=field(f,'source'),familyKind=w==='personal'?field(f,'familyKind')||'regular':null;return write(s=>{
    const source=(C.ledger(s).sources||[]).find(q=>q.id===sourceId&&q.wallet===w&&q.currency===c);
    const effectiveNote=note||source?.name||'',effectiveAccount=acct||source?.accountId||'';
-   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',allocations:api.currencyPlan(w,n,date)});
-   else C.ensure(s).events.push({id:C.uuid(),type:'uah_income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',allocations:C.allocateUAH(s,w,n,date)});
+   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',...(familyKind?{familyKind}:{}),allocations:api.currencyPlan(w,n,date)});
+   else C.ensure(s).events.push({id:C.uuid(),type:'uah_income',wallet:w,cents:n,date,note:effectiveNote,accountId:effectiveAccount,sourceId:sourceId||'',...(familyKind?{familyKind}:{}),allocations:C.allocateUAH(s,w,n,date)});
   },'✅ '+C.money(n,c)+' отримано й розподілено.');
  }
  if(mode==='expense'){
-  const n=C.parse(field(f,'amount')),category=field(f,'category');return write(s=>{
-   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'expense',wallet:w,cents:n,date,note,category,accountId:acct});
-   else C.ensure(s).events.push({id:C.uuid(),type:'uah_expense',wallet:w,cents:n,date,note,category,accountId:acct});
+  const n=C.parse(field(f,'amount')),category=field(f,'category'),expenseKind=w==='personal'?(field(f,'expenseKind')||'purchase'):null,receipt=field(f,'merchantEUR').trim(),extra={...(expenseKind?{expenseKind}:{}),...(receipt&&c==='UAH'&&w==='personal'?{merchantCents:C.parse(receipt)}:{})};return write(s=>{
+   if(c==='EUR')s.transactions.push({id:C.uuid(),type:'expense',wallet:w,cents:n,date,note,category,accountId:acct,...extra});
+   else C.ensure(s).events.push({id:C.uuid(),type:'uah_expense',wallet:w,cents:n,date,note,category,accountId:acct,...extra});
   },'✅ Витрату '+C.money(n,c)+' записано.');
  }
  if(mode==='move'){
@@ -187,8 +190,8 @@ function submit(f){
   return write(s=>C.ensure(s).events.push({id:C.uuid(),type:'exchange',wallet:w,fromCurrency:c,toCurrency:other,fromCategory:field(f,'fromCategory'),toCategory:field(f,'toCategory'),fromCents,toCents,fromAccountId:field(f,'fromAccount'),toAccountId:field(f,'toAccount'),date,note}), '✅ Обмін відображено в обох валютах, без подвійного обліку.');
  }
  if(mode==='account'){
-  const name=field(f,'accountName').trim();if(!name||name.length>90)throw Error('Введи назву рахунку від 1 до 90 символів');
-  return write(s=>C.ensure(s).accounts.push({id:C.uuid(),wallet:w,currency:c,name}),'✅ Рахунок/картку додано.');
+  const name=field(f,'accountName').trim(),kind=field(f,'accountKind')||'card';if(!name||name.length>90)throw Error('Введи назву рахунку від 1 до 90 символів');
+   return write(s=>C.ensure(s).accounts.push({id:C.uuid(),wallet:w,currency:c,name,kind}),'✅ Рахунок/картку додано.');
  }
  if(mode==='accountMove'){
   const n=C.parse(field(f,'amount')),fromAccountId=field(f,'fromAccount'),toAccountId=field(f,'toAccount');if(!fromAccountId||!toAccountId||fromAccountId===toAccountId)throw Error('Обери два різні рахунки.');
@@ -224,21 +227,24 @@ function mount(){
  const nav=d.querySelector('.side .nav');if(nav&&!d.getElementById('openCurrencies')){
   const btn=d.createElement('button');btn.id='openCurrencies';btn.type='button';btn.innerHTML='<span class="ico">💶</span> Валюти € / ₴';nav.insertBefore(btn,d.getElementById('openBudgetPlan')||nav.querySelector('[data-page="rules"]')||nav.lastElementChild);btn.addEventListener('click',open);
  }
- for(const name of ['openCurrenciesMobile','openCurrenciesDashboard'])d.getElementById(name)?.addEventListener('click',open);
+  if(nav&&!d.getElementById('openFamilyCalculator')){const btn=d.createElement('button');btn.type='button';btn.id='openFamilyCalculator';btn.innerHTML='<span class="ico">🏠</span> Сімейний калькулятор';nav.insertBefore(btn,d.getElementById('openBudgetPlan')||nav.lastElementChild);btn.addEventListener('click',()=>{wallet='personal';currency='UAH';open()});}
+  for(const name of ['openCurrenciesMobile','openCurrenciesDashboard'])d.getElementById(name)?.addEventListener('click',open);
+  d.getElementById('openFamilyDashboard')?.addEventListener('click',()=>{wallet='personal';currency='UAH';open();});
  panel=d.createElement('section');panel.id='solCurrencyPanel';panel.hidden=true;panel.tabIndex=-1;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Валютні гаманці EUR та UAH');d.body.appendChild(panel);
  panel.addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;
   if(btn.hasAttribute('data-mc-close')){close();return;}
-  if(btn.dataset.mcWallet){wallet=btn.dataset.mcWallet;if(btn.dataset.mcCurrency)currency=btn.dataset.mcCurrency;render();return;}
+   if(btn.dataset.sfGo){wallet='personal';const action=btn.dataset.sfGo,preview=root.SOLFamilyBudget?.getScenario();if(action==='cash'){currency='UAH';mode='fx';}else{mode=action;}render();const f=d.getElementById('mcForm');if(f&&action!=='cash'&&preview?.amount){const amount=f.elements.namedItem('amount');if(amount)amount.value=preview.amount;if(action==='expense'){const cat=f.elements.namedItem('category');if(cat)cat.value=preview.category;}else{const kind=f.elements.namedItem('familyKind'),note=f.elements.namedItem('note');if(kind)kind.value='refund';if(note&&!note.value)note.value='Повернення власних коштів';}updatePreview();}f?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+   if(btn.dataset.mcWallet){wallet=btn.dataset.mcWallet;if(btn.dataset.mcCurrency)currency=btn.dataset.mcCurrency;render();return;}
   if(btn.dataset.mcCurrency){currency=btn.dataset.mcCurrency;render();return;}
   if(btn.dataset.mcAction){mode=btn.dataset.mcAction;if(mode==='owner')wallet='business';render();return;}
   if(btn.dataset.mcBudget){close();d.getElementById('openBudgetPlan')?.click();return;}
   if(btn.dataset.mcExport){exportAllCsv(sn());return;}
  });
- panel.addEventListener('input',e=>{if(['amount','fromAmount','toAmount'].includes(e.target.name))updatePreview()});
- panel.addEventListener('change',e=>{if(e.target.name!=='source')return;const s=sn(),f=d.getElementById('mcForm'),source=(C.ledger(s).sources||[]).find(x=>x.id===e.target.value);if(!f||!source)return;
+  panel.addEventListener('input',e=>{if(['amount','fromAmount','toAmount'].includes(e.target.name))updatePreview();if(e.target.closest('#sfScenarioForm'))root.SOLFamilyBudget?.updatePreview(panel,sn(),currency)});
+  panel.addEventListener('change',e=>{if(e.target.name==='sfMonth'){try{root.SOLFamilyBudget?.setMonth(e.target.value);render();}catch(err){root.alert(err.message);}return;}if(['sfKind','sfCategory'].includes(e.target.name)){root.SOLFamilyBudget?.updatePreview(panel,sn(),currency);return;}if(e.target.name!=='source')return;const s=sn(),f=d.getElementById('mcForm'),source=(C.ledger(s).sources||[]).find(x=>x.id===e.target.value);if(!f||!source)return;
   const a=f.elements.namedItem('account'),n=f.elements.namedItem('note');if(a&&source.accountId)a.value=source.accountId;if(n&&!n.value)n.value=source.name;
  });
- panel.addEventListener('submit',e=>{if(e.target.id!=='mcForm')return;e.preventDefault();try{submit(e.target)}catch(err){const msg=d.getElementById('mcMessage');if(msg){msg.hidden=false;msg.classList.add('error');msg.textContent='⚠️ '+err.message;}}});
+  panel.addEventListener('submit',e=>{if(e.target.id==='sfLimitsForm'){e.preventDefault();root.SOLFamilyBudget?.saveLimits(e.target,currency,render);return;}if(e.target.id!=='mcForm')return;e.preventDefault();try{submit(e.target)}catch(err){const msg=d.getElementById('mcMessage');if(msg){msg.hidden=false;msg.classList.add('error');msg.textContent='⚠️ '+err.message;}}});
  d.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)close()});
  const oldLoad=api.loadSnapshot;api.loadSnapshot=function(){const value=oldLoad.apply(this,arguments);if(new URLSearchParams(root.location.search).get('wallets')==='1'||root.location.hash==='#currencies')root.setTimeout(open,80);return value;};
  const oldLock=api.onLock;api.onLock=function(){close();return oldLock.apply(this,arguments)};

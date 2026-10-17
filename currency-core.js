@@ -2,9 +2,9 @@
 (function(root){
 'use strict';
 const CUR=['EUR','UAH'], W=['business','personal'], MAX=100000000000;
-const fresh=()=>({version:1,accounts:[],events:[],sources:[],uahTargets:{business:{},personal:{}}});
+const fresh=()=>({version:1,accounts:[],events:[],sources:[],uahTargets:{business:{},personal:{}},familyLimits:{EUR:{},UAH:{}}});
 const ledger=s=>s.currencyLedger||fresh();
-const ensure=s=>{const l=s.currencyLedger||(s.currencyLedger=fresh());if(!Array.isArray(l.sources))l.sources=[];return l};
+const ensure=s=>{const l=s.currencyLedger||(s.currencyLedger=fresh());if(!Array.isArray(l.sources))l.sources=[];if(!l.familyLimits)l.familyLimits={EUR:{},UAH:{}};return l};
 const clone=x=>JSON.parse(JSON.stringify(x));
 const valid=n=>Number.isSafeInteger(n)&&n>0&&n<=MAX;
 const money=(n,c)=>new Intl.NumberFormat('uk-UA',{style:'currency',currency:c,minimumFractionDigits:2,maximumFractionDigits:2}).format(n/100);
@@ -49,19 +49,20 @@ function validate(s){
  const l=s.currencyLedger;
  if(!l||l.version!==1||!Array.isArray(l.events)||l.events.length>20000||!Array.isArray(l.accounts)||l.accounts.length>80||!l.uahTargets||typeof l.uahTargets!=='object')throw Error('Неправильна структура валютного гаманця');
  const acct=new Map();
- for(const a of l.accounts){if(!a||typeof a.id!=='string'||a.id.length<1||a.id.length>80||acct.has(a.id)||!W.includes(a.wallet)||!CUR.includes(a.currency)||typeof a.name!=='string'||!a.name.trim()||a.name.length>90)throw Error('Невірний рахунок/картка');acct.set(a.id,a);}
+ for(const a of l.accounts){if(!a||typeof a.id!=='string'||a.id.length<1||a.id.length>80||acct.has(a.id)||!W.includes(a.wallet)||!CUR.includes(a.currency)||typeof a.name!=='string'||!a.name.trim()||a.name.length>90||(a.kind!==undefined&&!['card','cash','other'].includes(a.kind)))throw Error('Невірний рахунок/картка');acct.set(a.id,a);}
  if(l.sources!==undefined){if(!Array.isArray(l.sources)||l.sources.length>100)throw Error('Неправильний список джерел доходів');const srcids=new Set();for(const q of l.sources){if(!q||typeof q.id!=='string'||q.id.length<1||q.id.length>90||srcids.has(q.id)||!W.includes(q.wallet)||!CUR.includes(q.currency)||typeof q.name!=='string'||!q.name.trim()||q.name.length>90||!['once','monthly','irregular'].includes(q.frequency)||!Number.isSafeInteger(q.expectedCents)||q.expectedCents<0||q.expectedCents>MAX||!account(q.accountId,q.wallet,q.currency))throw Error('Некоректне джерело надходжень');srcids.add(q.id);}}
  for(const w of W){const t=l.uahTargets[w];if(!t||typeof t!=='object'||Array.isArray(t))throw Error('Помилка гривневих цілей');for(const [k,v] of Object.entries(t)){if(!cats(s,w).some(c=>c.id===k)||!Number.isSafeInteger(v)||v<0||v>MAX)throw Error('Гривнева ціль пошкоджена');}}
+ if(l.familyLimits!==undefined){if(!l.familyLimits||typeof l.familyLimits!=='object'||Array.isArray(l.familyLimits))throw Error('Некоректні сімейні ліміти');for(const currency of CUR){const limits=l.familyLimits[currency];if(!limits||typeof limits!=='object'||Array.isArray(limits))throw Error('Некоректні ліміти '+currency);for(const [k,n] of Object.entries(limits))if(!cats(s,'personal').some(x=>x.id===k)||!Number.isSafeInteger(n)||n<0||n>MAX)throw Error('Некоректний сімейний ліміт');}}
  const cat=(w,k)=>typeof k==='string'&&cats(s,w).some(c=>c.id===k);
  function account(id,w,c){return id===undefined||id===''||id===null||acct.has(id)&&acct.get(id).wallet===w&&acct.get(id).currency===c;}
  function validSource(id,w,c){return !id||(l.sources||[]).some(q=>q.id===id&&q.wallet===w&&q.currency===c);}
  function alloc(a,w,n){return Array.isArray(a)&&a.length<=45&&a.reduce((v,x)=>v+(Number.isSafeInteger(x.cents)?x.cents:0),0)===n&&a.every(x=>cat(w,x.id)&&Number.isSafeInteger(x.cents)&&x.cents>=0);}
  const all=new Set(),b=buckets(s);baseEuro(s,b.EUR);
- for(const t of s.transactions){if(t.accountId&&!account(t.accountId,t.wallet,'EUR'))throw Error('Рахунок єврової операції не знайдено');if(t.type==='income'&&!validSource(t.sourceId,t.wallet,'EUR'))throw Error('Джерело єврового доходу не знайдено');if(t.type==='owner'){if(t.fromAccountId&&!account(t.fromAccountId,'business','EUR'))throw Error('Рахунок BMH не знайдено');if(t.toAccountId&&!account(t.toAccountId,'personal','EUR'))throw Error('Сімейний рахунок не знайдено');}}
+ for(const t of s.transactions){if(t.accountId&&!account(t.accountId,t.wallet,'EUR'))throw Error('Рахунок єврової операції не знайдено');if(t.type==='income'&&!validSource(t.sourceId,t.wallet,'EUR'))throw Error('Джерело єврового доходу не знайдено');if(t.familyKind!==undefined&&(!['regular','refund','opening'].includes(t.familyKind)||t.wallet!=='personal'||t.type!=='income'))throw Error('Неправильний тип сімейного надходження');if(t.merchantCents!==undefined&&(!valid(t.merchantCents)||t.type!=='expense'))throw Error('Невірна валюта покупки');if(t.expenseKind!==undefined&&(!['purchase','fee','other'].includes(t.expenseKind)||t.type!=='expense'))throw Error('Невірний тип витрати');if(t.type==='owner'){if(t.fromAccountId&&!account(t.fromAccountId,'business','EUR'))throw Error('Рахунок BMH не знайдено');if(t.toAccountId&&!account(t.toAccountId,'personal','EUR'))throw Error('Сімейний рахунок не знайдено');}}
  for(const e of l.events){
   if(!e||typeof e.id!=='string'||e.id.length<1||e.id.length>100||all.has(e.id)||!dateOk(e.date)||typeof e.note!=='string'||e.note.length>250)throw Error('Некоректна валютна операція');all.add(e.id);
-  if(e.type==='uah_income'){if(!W.includes(e.wallet)||!valid(e.cents)||!alloc(e.allocations,e.wallet,e.cents)||!account(e.accountId,e.wallet,'UAH')||!validSource(e.sourceId,e.wallet,'UAH'))throw Error('Неправильне надходження ₴');}
-  else if(e.type==='uah_expense'){if(!W.includes(e.wallet)||!valid(e.cents)||!cat(e.wallet,e.category)||!account(e.accountId,e.wallet,'UAH'))throw Error('Неправильна витрата ₴');}
+  if(e.type==='uah_income'){if(!W.includes(e.wallet)||!valid(e.cents)||!alloc(e.allocations,e.wallet,e.cents)||!account(e.accountId,e.wallet,'UAH')||!validSource(e.sourceId,e.wallet,'UAH')||(e.familyKind!==undefined&&(!['regular','refund','opening'].includes(e.familyKind)||e.wallet!=='personal')))throw Error('Неправильне надходження ₴');}
+  else if(e.type==='uah_expense'){if(!W.includes(e.wallet)||!valid(e.cents)||!cat(e.wallet,e.category)||!account(e.accountId,e.wallet,'UAH')||(e.merchantCents!==undefined&&!valid(e.merchantCents))||(e.expenseKind!==undefined&&!['purchase','fee','other'].includes(e.expenseKind)))throw Error('Неправильна витрата ₴');}
   else if(e.type==='uah_move'){if(!W.includes(e.wallet)||!valid(e.cents)||!cat(e.wallet,e.from)||!cat(e.wallet,e.to)||e.from===e.to)throw Error('Неправильне переміщення ₴');}
   else if(e.type==='uah_owner'){if(!valid(e.cents)||!cat('business','owner')||!alloc(e.allocations,'personal',e.cents)||!account(e.fromAccountId,'business','UAH')||!account(e.toAccountId,'personal','UAH'))throw Error('Неправильний переказ собі ₴');}
   else if(e.type==='exchange'){if(!W.includes(e.wallet)||!CUR.includes(e.fromCurrency)||!CUR.includes(e.toCurrency)||e.fromCurrency===e.toCurrency||!cat(e.wallet,e.fromCategory)||!cat(e.wallet,e.toCategory)||!valid(e.fromCents)||!valid(e.toCents)||!account(e.fromAccountId,e.wallet,e.fromCurrency)||!account(e.toAccountId,e.wallet,e.toCurrency))throw Error('Неправильна валютна конвертація');}
