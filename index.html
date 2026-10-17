@@ -8,11 +8,12 @@
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
-  <title>SOL Wallet 9.0 — EUR € та UAH ₴</title>
+  <title>SOL Wallet 10.0 — сімейний бюджет EUR € та UAH ₴</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="stylesheet" href="./budget.css">
-  <link rel="stylesheet" href="./currency.css?v=9">
+  <link rel="stylesheet" href="./currency.css?v=10">
+  <link rel="stylesheet" href="./family-budget.css?v=10">
 
 
   <style>
@@ -273,7 +274,7 @@
   <section class="gate-card">
     <div class="gate-symbol">S</div>
     <div class="eyebrow">ПРИВАТНИЙ ФІНАНСОВИЙ ПРОСТІР</div>
-    <h1>SOL Wallet <span>9.0</span></h1>
+    <h1>SOL Wallet <span>10.0</span></h1>
     <p class="gate-lead">Кожне євро та кожна гривня — на своєму місці. Доступ лише з твоїм ключем.</p>
     <div id="vaultGateContent"></div>
     <div class="gate-message" id="vaultGateMessage" role="status" aria-live="polite"></div>
@@ -304,8 +305,11 @@
     <button type="button" id="openCurrenciesDashboard" class="currency-quicklink" aria-label="Відкрити гаманці євро та гривня">
       <span class="currency-quick-icons">💶 ₴</span><span class="currency-quick-copy"><strong>Мої валюти: € / ₴</strong><small>BMH і сім’я · картки · джерела надходжень</small></span><span class="currency-quick-arrow">→</span>
     </button>
+    <button type="button" id="openFamilyDashboard" class="currency-quicklink sf-quicklink" aria-label="Відкрити сімейний калькулятор">
+      <span class="currency-quick-icons">🏠 🧮</span><span class="currency-quick-copy"><strong>Сімейний калькулятор</strong><small>Надходження · покупки · готівка · ліміти · залишок</small></span><span class="currency-quick-arrow">→</span>
+    </button>
     <div id="content"></div>
-    <div class="bottom-note">SOL Wallet v6.0 · Шифрований фінансовий планувальник, не банк і не податкова консультація · Усі суми в EUR</div>
+    <div class="bottom-note">SOL Wallet v10.0 · Зашифрований особистий планувальник · EUR і UAH обліковуються окремо · Не є банком чи податковою консультацією</div>
   </main>
 </div>
 <nav class="mobile-nav" aria-label="Мобільна навігація">
@@ -1421,7 +1425,8 @@
 
 </script>
 <script src="./budget.js"></script>
-<script src="./currency-core.js?v=9"></script>
-<script src="./currency-ui.js?v=9"></script>
+<script src="./currency-core.js?v=10"></script>
+<script src="./currency-ui.js?v=10"></script>
+<script src="./family-budget.js?v=10"></script>
 </body>
 </html>

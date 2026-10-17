@@ -1,0 +1,28 @@
+/* SOL Wallet 10: native personal-family finance panel inside the encrypted currency wallet. */
+.sf-card{margin-top:15px;border-color:#5d9c88!important}
+.sf-card h4{font-size:15px;margin:13px 0 9px;color:#d9fff1}
+.sf-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.sf-month{font-size:11px;color:#bad1d9}
+.sf-month input{display:block;width:145px;margin-top:4px;min-height:37px;padding:7px;border-radius:9px;color:#effff8;background:#091c29;border:1px solid #527889}
+.sf-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:13px 0}
+.sf-metrics>div{border:1px solid #335e5b;border-radius:12px;padding:11px;background:#112d34;min-width:0}
+.sf-metrics small{display:block;font-size:11px;color:#a3c4c8;min-height:30px}
+.sf-metrics strong{display:block;font-size:clamp(14px,2.3vw,20px);margin-top:5px;word-break:break-word;color:#b4f5d6}
+.sf-smallrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:6px 0;border-bottom:1px solid #284353;font-size:12px}
+.sf-smallrow strong{font-size:13px;text-align:right}
+.sf-divider{margin:18px 0;border-top:1px solid #345966}
+.sf-scenario{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;align-items:end}
+.sf-scenario .mc-field{min-width:0}
+.sf-preview{background:#0c2830;border:1px solid #436a63;border-radius:12px;padding:12px;margin:12px 0;font-size:12px;line-height:1.5}
+.sf-preview>strong{color:#b7ffdf}
+.sf-buttons{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.sf-limit-row{display:grid;grid-template-columns:minmax(0,1fr) 134px;gap:13px;align-items:center;padding:10px 0;border-bottom:1px solid #2a4555}
+.sf-limit-name{min-width:0;font-size:12px}
+.sf-limit-name strong{display:block}
+.sf-limit-name small{display:block;color:#a6c6cd;line-height:1.45;margin-top:2px}
+.sf-input-small{font-size:10px;min-width:0}
+.sf-input-small input{display:block;width:100%;margin-top:4px;min-height:39px;border:1px solid #456a78;border-radius:10px;background:#091d2a;color:#effff8;padding:7px 8px;min-width:0;font:inherit;font-size:13px;text-align:right}
+.sf-alert,.sf-limit-name .sf-alert{color:#ffb2a8!important}
+.sf-exceeded{background:#3b252a66;border-radius:8px;padding-left:6px;padding-right:6px}
+@media(max-width:760px){.sf-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sf-scenario{grid-template-columns:1fr}.sf-scenario .mc-field{margin:4px 0}}
+@media(max-width:400px){.sf-limit-row{grid-template-columns:minmax(0,1fr) 112px;gap:8px}.sf-smallrow strong{font-size:12px}}
