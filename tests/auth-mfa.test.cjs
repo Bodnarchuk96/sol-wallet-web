@@ -17,10 +17,10 @@ test('Every inline script compiles and has a valid SHA-256 in the CSP, no unsafe
 test('Cloud wallet read and write require elevated AAL2 in the active session',()=>{
  assert.match(html,/async function authorizedToken/);
  assert.ok(html.includes("if(jwtAal(t)!=='aal2')"),'token AAL2 check exists');
- assert.match(html,/async function remoteRead\(\)\{\s*mfaRequired\(\)/);
+ assert.match(html,/async function remoteRead\(\)\{\s*if\(activeSlot==='new'\)[^\n]+\s*mfaRequired\(\)/);
  assert.match(html,/const rows=await readApi\(route,\{token:await authorizedToken\(\)\}\)/);
  assert.match(html,/const t=await authorizedToken\(\)/);
- assert.match(html,/async function cloudOpen\(\)\{\s*mfaRequired\(\)/);
+ assert.match(html,/async function cloudOpen\(\)\{\s*if\(activeSlot==='new'\)[^\n]+\s*mfaRequired\(\)/);
 });
 test('Server-backed authenticator flow with enrollment, challenge, verify, and confirmed AAL2 only',()=>{
  assert.match(html,/\/auth\/v1\/factors/);
