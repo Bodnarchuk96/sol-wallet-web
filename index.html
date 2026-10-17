@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1823">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-f4XiC5FchitrtvpFCsaS59SnviJXwv38zatVri2LV0M=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-xvDQQmZxrPR1JgYqG18olwOkA9bStx+DaBh8Mu0frG8='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-qOnzAzzh81VAI/zmRoHl+njhP9sR7wo2avfgVTEL+k4=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-AfKOrUoF4/OsVPz8QStRGAoNE17+ITZRyKJtjgz5kBQ='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
-  <title>SOL Wallet 10.0 — сімейний бюджет EUR € та UAH ₴</title>
+  <title>SOL Wallet 10.1 — сімейний бюджет і захищений акаунт</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="stylesheet" href="./budget.css">
@@ -274,7 +274,7 @@
   <section class="gate-card">
     <div class="gate-symbol">S</div>
     <div class="eyebrow">ПРИВАТНИЙ ФІНАНСОВИЙ ПРОСТІР</div>
-    <h1>SOL Wallet <span>10.0</span></h1>
+    <h1>SOL Wallet <span>10.1</span></h1>
     <p class="gate-lead">Кожне євро та кожна гривня — на своєму місці. Доступ лише з твоїм ключем.</p>
     <div id="vaultGateContent"></div>
     <div class="gate-message" id="vaultGateMessage" role="status" aria-live="polite"></div>
@@ -352,6 +352,7 @@
   const te=new TextEncoder(),td=new TextDecoder();
   let wallet=null,key=null,salt=null,iterations=ROUNDS,sealed=null,active=false;
   let gateMode='start', pendingRemote=null,remoteRevision=null,cloudEnabled=false,account=null,auth=null;
+  let mfaFactor=null,pendingEnrollment=null;
   let queue=Promise.resolve(),syncBlocked=false,syncState='local',inFlight=false;
   let idleTimer=null;
   const config=window.SOL_CONFIG||{};
@@ -444,7 +445,8 @@
     if(!active||!hasCloud)return;
     const remembered=getAuth();if(!remembered)return;
     try{
-      auth=remembered;await getUser();
+      auth=remembered;const user=await getUser();
+      if(jwtAal(auth.access_token)!=='aal2'){await beginMfa(user);return;}
       const remote=await remoteRead();pendingRemote=remote;remoteRevision=remote?.revision??null;
       const local=readLocal();
       if(!remote){syncState='online';cloudEnabled=false;updateStatus();renderGate('cloud-upload');return}
@@ -462,18 +464,34 @@
   function toggleGate(on){if(!on){const c=byId('vaultGateContent');if(c)c.innerHTML=''}byId('vaultGate').classList.toggle('hidden',!on);document.querySelector('.app').classList.toggle('locked',on)}
   function getGateContent(){return byId('vaultGateContent')}
   const field=(type,id,placeholder='',extra='')=>`<input class="field" id="${id}" type="${type}" ${type==='password'?'autocomplete="off"':''} ${extra} placeholder="${placeholder}" required>`;
-  const localIntro=()=>`<div class="gate-panel"><h2>🔐 Локальний захищений гаманець</h2><p>Працює вже зараз, навіть без окремої бази даних. Гроші й записи будуть зашифровані в браузері.</p>`;
+  const localIntro=()=>`<div class="gate-panel"><h2>🔐 Локальний захищений гаманець</h2><p>Локальний режим захищений секретною фразою; серверна 2FA діє тільки для окремого хмарного акаунта. Зашифровані записи залишаються у браузері.</p>`;
   function renderGate(mode='start'){
     gateMode=mode;toggleGate(true);setMessage('');const exists=!!readLocal();
     if(mode==='start'){
       const msg=exists?'Введи свою секретну фразу, щоб побачити баланс і конверти.':'Створи приватний гаманець. Секретна фраза потрібна для доступу та відновлення резервних копій.';
-      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions"><button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">☁️ Увійти в хмарний гаманець</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
+      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions"><button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">🛡️ Мій акаунт: email · пароль · 2FA</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
       byId('vaultPass')?.focus();return;
     }
     if(mode==='cloud' || mode==='cloud-signup'){
       if(!hasCloud){getGateContent().innerHTML='<div class="gate-panel"><h2>☁️ Хмара не налаштована</h2><p>Локальний зашифрований гаманець працює. Щоб синхронізувати його між пристроями, спершу треба налаштувати захищену базу та Auth.</p><button id="gateReturn" class="btn primary" type="button">← Повернутися</button></div>';return}
-      getGateContent().innerHTML=`<div class="gate-panel"><h2>☁️ ${mode==='cloud'?'Вхід у приватну хмару':'Новий хмарний акаунт'}</h2><p>Хмарний пароль — для входу. Секретна фраза гаманця — окремий ключ шифрування, який нікуди не надсилається.</p><form data-vault-form="${mode==='cloud'?'signin':'signup'}"><label class="fieldlabel" for="accountEmail">Email</label>${field('email','accountEmail','email@example.com','autocomplete="email" maxlength="254"')}<label class="fieldlabel" for="accountPassword">Пароль хмарного акаунта</label>${field('password','accountPassword','Мінімум 12 символів','autocomplete="current-password" minlength="12" maxlength="200"')}<button class="btn primary" type="submit">${mode==='cloud'?'Увійти':'Створити акаунт'}</button></form><button class="btn ghost" id="${mode==='cloud'?'gateSignup':'gateSignin'}" type="button">${mode==='cloud'?'Створити новий акаунт':'Уже маю акаунт'}</button><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;
+      getGateContent().innerHTML=`<div class="gate-panel"><h2>☁️ ${mode==='cloud'?'Вхід у приватну хмару':'Новий хмарний акаунт'}</h2><p>Спочатку email і пароль, потім код Authenticator (TOTP). Секретна фраза гаманця — окремий локальний ключ, який нікуди не надсилається.</p><form data-vault-form="${mode==='cloud'?'signin':'signup'}"><label class="fieldlabel" for="accountEmail">Email</label>${field('email','accountEmail','email@example.com','autocomplete="email" maxlength="254"')}<label class="fieldlabel" for="accountPassword">Пароль хмарного акаунта</label>${field('password','accountPassword','Мінімум 12 символів','autocomplete="current-password" minlength="12" maxlength="200"')}<button class="btn primary" type="submit">${mode==='cloud'?'Увійти':'Створити акаунт'}</button></form><button class="btn ghost" id="${mode==='cloud'?'gateSignup':'gateSignin'}" type="button">${mode==='cloud'?'Створити новий акаунт':'Уже маю акаунт'}</button><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;
       return;
+    }
+    if(mode==='mfa-verify'||mode==='mfa-setup'){
+      if(!hasCloud||!auth||!mfaFactor){renderGate('cloud');setMessage('Спочатку увійди до хмарного акаунта.',true);return}
+      const setup=mode==='mfa-setup',qr=setup&&pendingEnrollment?.qr;
+      let image='';
+      if(qr&&qr.length<50000){
+        const svg=qr.trim();let src='';
+        if(svg.startsWith('<svg')&&svg.includes('</svg>'))src='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+        else if(svg.startsWith('data:image/svg+xml'))src=svg;
+        if(src)image='<img alt="QR-код для Authenticator" style="display:block;max-width:240px;width:100%;margin:14px auto;background:#fff;padding:8px;border-radius:12px" src="'+htmlEscape(src)+'">';
+      }
+      const secret=setup?'<p class="helper">Якщо QR не зчитується, додай код налаштування вручну (нікому його не передавай):</p><code style="display:block;overflow-wrap:anywhere;padding:12px;margin:10px 0;background:#081c29;border-radius:9px">'+htmlEscape(pendingEnrollment.secret)+'</code>':'';
+      getGateContent().innerHTML='<div class="gate-panel"><h2>'+(setup?'🛡️ Підключити двофакторний захист':'🛡️ Підтвердити другий фактор')+'</h2><p>'+(setup?'Відскануй QR через Google Authenticator / Microsoft Authenticator та введи 6 цифр. Хмара залишається заблокованою до успішної перевірки.':'Відкрий Authenticator і введи поточні 6 цифр. Другий фактор перевіряє сервер.')+'</p>'+image+secret+
+      '<form data-vault-form="'+(setup?'mfa-setup':'mfa-verify')+'"><label class="fieldlabel" for="mfaCode">Код із Authenticator</label>'+field('text','mfaCode','6 цифр','inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6"')+'<button class="btn primary" type="submit">'+(setup?'✅ Активувати 2FA':'🔓 Підтвердити вхід')+'</button></form><p class="helper">Код перевіряється Supabase Auth. Секрет налаштування не зберігається у фінансовому журналі.</p></div>'+
+      '<div class="gate-actions"><button id="gateReturn" class="btn ghost" type="button">← Назад</button></div>';
+      byId('mfaCode')?.focus();return;
     }
     if(mode==='remote-unlock'){
       getGateContent().innerHTML=`<div class="gate-panel"><h2>🔑 Відкрити хмарні дані</h2><p>Хмарний акаунт підтверджений. Тепер введи секретну фразу гаманця для розшифрування. Вона не передається серверу.</p><form data-vault-form="remote-unlock"><label class="fieldlabel" for="vaultPass">Секретна фраза гаманця</label>${field('password','vaultPass','Твоя окрема секретна фраза','minlength="1" maxlength="200"')}<button class="btn primary" type="submit">🔓 Розшифрувати й відкрити</button></form><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;return;
@@ -522,7 +540,7 @@
     if(!response.ok){
       let reason=content?.msg||content?.message||content?.error_description||content?.error||`HTTP ${response.status}`;
       if(response.status===401)reason='Сесія завершилась або неправильний пароль.';
-      if(response.status===404)reason='Таблиця хмарного гаманця ще не створена або недоступна (SQL migration).';
+      if(response.status===404&&path.startsWith('/rest/'))reason='Таблиця хмарного гаманця ще не створена або недоступна (SQL migration).';
       const err=new Error(String(reason).slice(0,210));err.status=response.status;if(response.status===409)err.conflict=true;throw err;
     }
     return content;
@@ -543,28 +561,62 @@
   async function getUser(){
     const u=await readApi('/auth/v1/user',{token:await token()});
     if(!/^[0-9a-f-]{36}$/i.test(u?.id||''))throw Error('Помилка перевірки власника акаунта');
-    account={id:u.id,email:u.email||''};return account;
+    account={id:u.id,email:u.email||'',factors:Array.isArray(u.factors)?u.factors:[]};return account;
+  }
+  function jwtAal(access){
+    if(typeof access!=='string')return 'aal1';
+    try{const part=access.split('.')[1];if(!part)return 'aal1';const value=JSON.parse(atob(part.replace(/-/g,'+').replace(/_/g,'/')));return value?.aal==='aal2'?'aal2':'aal1'}
+    catch(_){return 'aal1'}
+  }
+  function verifiedFactors(user=account){return (user?.factors||[]).filter(f=>f?.factor_type==='totp'&&f?.status==='verified'&&/^[\w-]{10,80}$/.test(f.id));}
+  function mfaRequired(){
+    // This local AAL check is defense in depth. Real authorization must be enforced by signed-JWT RLS on the server.
+    if(jwtAal(auth?.access_token)!=='aal2')throw Error('Другий фактор ще не підтверджено. Доступ до хмари закритий.');
+  }
+  async function authorizedToken(){const t=await token();if(jwtAal(t)!=='aal2')throw Error('Сесія потребує повторного підтвердження 2FA.');return t;}
+  function clearPendingMfa(){mfaFactor=null;pendingEnrollment=null;}
+  async function beginMfa(user=account){
+    const factors=verifiedFactors(user);clearPendingMfa();
+    if(factors.length){mfaFactor=factors[0].id;renderGate('mfa-verify');return;}
+    const enrolled=await readApi('/auth/v1/factors',{method:'POST',token:await token(),payload:{factor_type:'totp',friendly_name:'SOL Wallet'}});
+    if(!enrolled||typeof enrolled.id!=='string'||enrolled.type!=='totp'||typeof enrolled.totp?.secret!=='string'||!enrolled.totp.secret||typeof enrolled.totp?.qr_code!=='string')throw Error('Сервер не надав дані для підключення Authenticator.');
+    mfaFactor=enrolled.id;pendingEnrollment={id:enrolled.id,secret:enrolled.totp.secret,qr:enrolled.totp.qr_code};
+    renderGate('mfa-setup');
+  }
+  async function verifyMfa(code){
+    if(!/^\d{6}$/.test(code))throw Error('Введи шість цифр із застосунку Authenticator.');
+    if(!mfaFactor||!auth)throw Error('Сеанс 2FA не знайдено. Увійди ще раз.');
+    const factor=encodeURIComponent(mfaFactor);
+    const challenge=await readApi('/auth/v1/factors/'+factor+'/challenge',{method:'POST',token:await token(),payload:{}});
+    if(!challenge||typeof challenge.id!=='string')throw Error('Сервер не створив перевірку 2FA.');
+    const verified=await readApi('/auth/v1/factors/'+factor+'/verify',{method:'POST',token:await token(),payload:{challenge_id:challenge.id,code}});
+    if(!verified?.access_token||!verified?.refresh_token||jwtAal(verified.access_token)!=='aal2')throw Error('Другий фактор не підтверджено сервером.');
+    setAuth(verified);const user=await getUser();
+    if(!verifiedFactors(user).length)throw Error('Authenticator ще не підтверджений у профілі. Хмарний доступ закрито.');
+    clearPendingMfa();await cloudOpen();
   }
   async function signin(email,password){
     if(!email.includes('@')||password.length<12)throw Error('Перевір email і пароль');
     const result=await readApi('/auth/v1/token?grant_type=password',{method:'POST',payload:{email,password}});
-    setAuth(result);await getUser();await cloudOpen();
+    setAuth(result);const user=await getUser();if(jwtAal(result.access_token)==='aal2'&&verifiedFactors(user).length)await cloudOpen();else await beginMfa(user);
   }
   async function signup(email,password){
     if(!email.includes('@')||password.length<12)throw Error('Введи email і пароль від 12 символів');
     const result=await readApi('/auth/v1/signup',{method:'POST',payload:{email,password}});
-    if(result?.access_token&&result?.refresh_token){setAuth(result);await getUser();await cloudOpen();return}
+    if(result?.access_token&&result?.refresh_token){setAuth(result);const user=await getUser();await beginMfa(user);return}
     renderGate('cloud');setMessage('Перевір пошту й підтвердь створення акаунта. Після цього увійди. Якщо реєстрацію вимкнено, акаунт додає адміністратор.');
   }
   async function remoteRead(){
+    mfaRequired();
     const route='/rest/v1/sol_wallets?select=revision,payload,updated_at&user_id=eq.'+encodeURIComponent(account.id);
-    const rows=await readApi(route,{token:await token()});
+    const rows=await readApi(route,{token:await authorizedToken()});
     if(!Array.isArray(rows))throw Error('Неправильна відповідь хмарного сховища');
     if(!rows.length)return null;
     if(rows.length!==1||!Number.isSafeInteger(rows[0].revision)||rows[0].revision<1)throw Error('Хмара повернула некоректну версію даних');
     checkPayload(rows[0].payload);return rows[0];
   }
   async function cloudOpen(){
+    mfaRequired();
     pendingRemote=await remoteRead();remoteRevision=pendingRemote?.revision??null;
     const local=readLocal();
     if(!pendingRemote){
@@ -582,7 +634,7 @@
   }
   async function remoteWrite(blob,{replace=false}={}){
     checkPayload(blob);
-    const t=await token();
+    const t=await authorizedToken();
     if(remoteRevision===null){
       const results=await readApi('/rest/v1/sol_wallets',{method:'POST',token:t,prefer:'return=representation',payload:{user_id:account.id,revision:1,payload:blob}});
       if(!Array.isArray(results)||results.length!==1||results[0].revision!==1||!sameEnvelope(results[0].payload,blob))throw Error('Не вдалося перевірити запис у хмару');remoteRevision=1;return;
@@ -601,7 +653,7 @@
   }
   async function cloudUpload(){
     const blob=readLocal();if(!blob)throw Error('Немає локальної копії');
-    await remoteWrite(blob);cloudEnabled=true;syncBlocked=false;syncState='synced';
+    mfaRequired();await remoteWrite(blob);cloudEnabled=true;syncBlocked=false;syncState='synced';
     if(active){toggleGate(false);updateStatus()}else renderGate('start');
   }
   function persist(snapshot){
@@ -620,6 +672,7 @@
   }
   async function syncNow(){
     if(!active)throw Error('Спочатку відкрий гаманець');
+    if(account)mfaRequired();
     if(!hasCloud)throw Error('Хмара поки не налаштована. Заповни поля нижче у «Дані та безпека».');
     if(!account){renderGate('cloud');return 'signin'}
     await queue;
@@ -638,13 +691,13 @@
   }
   async function lock(){
     if(!active){
-      auth=null;account=null;pendingRemote=null;remoteRevision=null;cloudEnabled=false;syncBlocked=false;syncState='local';
+      auth=null;account=null;clearPendingMfa();pendingRemote=null;remoteRevision=null;cloudEnabled=false;syncBlocked=false;syncState='local';
       try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};try{localStorage.removeItem(AUTH_STORAGE)}catch(_){};
       renderGate('start');updateStatus();return;
     }
     try{await queue}catch(e){}
     active=false;key=null;salt=null;currentData=null;
-    auth=null;account=null;try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};localStorage.removeItem(AUTH_STORAGE);
+    auth=null;account=null;clearPendingMfa();try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};localStorage.removeItem(AUTH_STORAGE);
     clearTimeout(idleTimer);
     cloudEnabled=false;syncState='local';pendingRemote=null;remoteRevision=null;syncBlocked=false;
     wallet.onLock();renderGate('start');updateStatus();
@@ -680,12 +733,13 @@
       }else if(task==='unlock'){await unlockLocal(byId('vaultPass').value)}
       else if(task==='signup'){await signup(byId('accountEmail').value.trim(),byId('accountPassword').value)}
       else if(task==='signin'){await signin(byId('accountEmail').value.trim(),byId('accountPassword').value)}
+      else if(task==='mfa-setup'||task==='mfa-verify'){await verifyMfa(byId('mfaCode').value.trim())}
       else if(task==='remote-unlock'){
         const remote=pendingRemote;
         if(!remote)throw Error('Хмарна копія недоступна');const result=await openSealed(remote.payload,byId('vaultPass').value);
         const existing=readLocal();
         if(existing&&!sameEnvelope(existing,remote.payload))protectVersion(existing,'before-local-replace');
-        cloudEnabled=true;syncBlocked=false;syncState='synced';activate(result,remote.payload);
+        mfaRequired();cloudEnabled=true;syncBlocked=false;syncState='synced';activate(result,remote.payload);
       }
       else if(task==='restore'){
         const file=byId('gateRestoreFile').files[0];if(!file||file.size>10000000)throw Error('Обери коректний файл до 10 МБ');
@@ -705,7 +759,7 @@
       if(v==='gateReturn'){
         if(active){
           // Cancel an unfinished cloud-link flow without leaving an unused session token behind.
-          if(!cloudEnabled&&account){auth=null;account=null;pendingRemote=null;remoteRevision=null;syncBlocked=false;syncState='local';
+          if(!cloudEnabled&&account){auth=null;account=null;clearPendingMfa();pendingRemote=null;remoteRevision=null;syncBlocked=false;syncState='local';
             try{sessionStorage.removeItem(AUTH_STORAGE)}catch(_){};try{localStorage.removeItem(AUTH_STORAGE)}catch(_){};updateStatus()}
           toggleGate(false);
         }else await lock();
@@ -713,13 +767,13 @@
       if(v==='gateSignup')renderGate('cloud-signup');
       if(v==='gateSignin')renderGate('cloud');
       if(v==='confirmUpload'){element.disabled=true;await cloudUpload()}
-      if(v==='chooseRemote'){
+      if(v==='chooseRemote'){mfaRequired();
         if(!confirm('Хмарна версія замінить локальні записи на цьому пристрої. Зроби резервну копію, якщо вони потрібні. Продовжити?'))return;
         active=false;key=null;salt=null;currentData=null;wallet.onLock();
         // The old encrypted local copy stays untouched until the remote vault is successfully decrypted.
         renderGate('remote-unlock');
       }
-      if(v==='chooseLocal'){
+      if(v==='chooseLocal'){mfaRequired();
         if(!confirm('Зашифрована локальна версія замінить хмарну. Цю дію не можна скасувати. Продовжити?'))return;
         element.disabled=true;await forceReplaceRemote(readLocal());
         if(active){toggleGate(false)}else renderGate('start');
@@ -1353,7 +1407,7 @@
    const reasons={'before-cloud-replace':'Копія з хмари перед заміною','before-local-replace':'Копія пристрою перед заміною','before-import':'Копія перед імпортом'};
    return `<div class="info-card"><h4>🛟 Аварійні зашифровані копії</h4><p>Перед заміною іншою версією гаманець автоматично зберігає до п’яти останніх зашифрованих копій. Це не хмарне резервування: завантаж важливу копію окремим JSON-файлом.</p>${history.length?history.map(item=>`<div class="recovery-row"><span>${esc(reasons[item.reason]||'Аварійна копія')}<small>${esc(item.at.slice(0,19).replace('T',' '))} UTC</small></span><button class="btn small" data-recovery-index="${item.index}">Зберегти JSON</button></div>`).join(''):'<p class="muted">Поки немає аварійних копій — це нормально.</p>'}</div>`;
  }
- function backup(){return `<div class="intro"><div><h3>Твій захищений гаманець</h3><p>Усі записи шифруються на цьому пристрої. Синхронізація — тільки після підключення приватної хмари.</p></div><div class="actions"><button class="btn" data-action="lock">🔒 Заблокувати</button></div></div><div class="security-layout"><div class="info-card"><h4>🔐 Зашифрована копія</h4><p>Резервна копія захищена твоєю секретною фразою. Без неї неможливо відновити вміст.</p><div class="actions"><button class="btn primary" data-action="export">Завантажити захищений JSON</button><button class="btn" data-action="csv">CSV (НЕшифрований)</button></div></div><div class="info-card"><h4>📥 Відновлення</h4><p>Імпортуй захищений JSON v2/v3/v4/v5/v6 або стару копію v1. Старі дані будуть замінені після підтвердження.</p><button class="btn" data-action="import">Обрати JSON</button><input type="file" id="importFile" accept=".json,application/json" hidden></div><div class="info-card"><h4>🔒 Захист</h4><p>AES-256-GCM, ключ із секретної фрази (PBKDF2). Вміст не зберігається відкритим текстом. Не забудь фразу — технічного способу її відновити немає.</p><p id="syncInfo" class="muted" style="font-size:12px">${esc(window.SOLVault.statusText())}</p><button class="btn soft" data-action="cloud">☁️ Увійти / синхронізувати</button><button class="btn ghost" data-action="syncNow">Перевірити хмару</button></div><div class="info-card"><h4>☁️ Налаштування приватної хмари</h4><p>Власний проєкт Supabase з увімкненими Auth і RLS. До сховища йдуть лише зашифровані записи. <strong>Ніколи не вводь secret/service_role!</strong></p><form id="cloudSetupForm"><label class="fieldlabel" for="cloudUrl">URL проєкту Supabase</label><input class="field" type="url" id="cloudUrl" autocomplete="off" placeholder="https://PROJECT.supabase.co" value="${esc(window.SOL_CONFIG?.supabaseUrl||'')}" required><label class="fieldlabel" for="cloudKey" style="margin-top:9px">Публічний ключ (publishable/anon)</label><input class="field" type="text" id="cloudKey" autocomplete="off" maxlength="4096" value="${esc(window.SOL_CONFIG?.publishableKey||'')}" placeholder="sb_publishable_…" required><div class="actions" style="margin-top:12px"><button class="btn primary" type="submit">Зберегти хмару</button><button class="btn ghost" type="button" data-action="clearCloud">Вимкнути</button></div></form><p style="margin-top:9px">Для запуску потрібна таблиця із <code>supabase/sol_wallets_v4.sql</code>. Доступні лише свої записи за RLS.</p></div>${readiness()}${recoveryPanel()}<div class="info-card"><h4>🧹 Почати з нуля</h4><p>Прибирає доходи, витрати та правила всередині активного гаманця (запис залишається захищеним). Спочатку зроби копію.</p><button class="btn warn" data-action="reset">Очистити гаманець</button></div></div><div class="notice neutral" style="margin-top:17px">🧮 <div><strong>Податки:</strong> базові 25% бізнесу — демонстраційний резерв, а не німецький податковий розрахунок. Виплата собі (Privatentnahme) — це переміщення, а не автоматично бізнес-витрата. Зарезервовані кошти не заблоковані банком.</div></div>`;}
+ function backup(){return `<div class="intro"><div><h3>Твій захищений гаманець</h3><p>Усі записи шифруються на цьому пристрої. Синхронізація — тільки після підключення приватної хмари.</p></div><div class="actions"><button class="btn" data-action="lock">🔒 Заблокувати</button></div></div><div class="security-layout"><div class="info-card"><h4>🔐 Зашифрована копія</h4><p>Резервна копія захищена твоєю секретною фразою. Без неї неможливо відновити вміст.</p><div class="actions"><button class="btn primary" data-action="export">Завантажити захищений JSON</button><button class="btn" data-action="csv">CSV (НЕшифрований)</button></div></div><div class="info-card"><h4>📥 Відновлення</h4><p>Імпортуй захищений JSON v2/v3/v4/v5/v6 або стару копію v1. Старі дані будуть замінені після підтвердження.</p><button class="btn" data-action="import">Обрати JSON</button><input type="file" id="importFile" accept=".json,application/json" hidden></div><div class="info-card"><h4>🔒 Захист</h4><p>AES-256-GCM, ключ із секретної фрази (PBKDF2). Вміст не зберігається відкритим текстом. Не забудь фразу — технічного способу її відновити немає.</p><p id="syncInfo" class="muted" style="font-size:12px">${esc(window.SOLVault.statusText())}</p><button class="btn soft" data-action="cloud">☁️ Увійти / синхронізувати</button><button class="btn ghost" data-action="syncNow">Перевірити хмару</button></div><div class="info-card"><h4>☁️ Налаштування приватної хмари</h4><p>Власний проєкт Supabase з увімкненими Auth і RLS. До сховища йдуть лише зашифровані записи. <strong>Ніколи не вводь secret/service_role!</strong></p><form id="cloudSetupForm"><label class="fieldlabel" for="cloudUrl">URL проєкту Supabase</label><input class="field" type="url" id="cloudUrl" autocomplete="off" placeholder="https://PROJECT.supabase.co" value="${esc(window.SOL_CONFIG?.supabaseUrl||'')}" required><label class="fieldlabel" for="cloudKey" style="margin-top:9px">Публічний ключ (publishable/anon)</label><input class="field" type="text" id="cloudKey" autocomplete="off" maxlength="4096" value="${esc(window.SOL_CONFIG?.publishableKey||'')}" placeholder="sb_publishable_…" required><div class="actions" style="margin-top:12px"><button class="btn primary" type="submit">Зберегти хмару</button><button class="btn ghost" type="button" data-action="clearCloud">Вимкнути</button></div></form><p style="margin-top:9px">Для хмарного захисту потрібен окремий Supabase-проєкт і політики <code>supabase/sol_wallets_mfa.sql</code> із вимогою AAL2. Без встановлених серверних політик 2FA не вважається повністю налаштованою.</p></div>${readiness()}${recoveryPanel()}<div class="info-card"><h4>🧹 Почати з нуля</h4><p>Прибирає доходи, витрати та правила всередині активного гаманця (запис залишається захищеним). Спочатку зроби копію.</p><button class="btn warn" data-action="reset">Очистити гаманець</button></div></div><div class="notice neutral" style="margin-top:17px">🧮 <div><strong>Податки:</strong> базові 25% бізнесу — демонстраційний резерв, а не німецький податковий розрахунок. Виплата собі (Privatentnahme) — це переміщення, а не автоматично бізнес-витрата. Зарезервовані кошти не заблоковані банком.</div></div>`;}
  function openModal(title,subtitle,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalSubtitle').textContent=subtitle;document.getElementById('modalContent').innerHTML=html;document.getElementById('modalBackdrop').classList.add('open');document.body.style.overflow='hidden';const first=document.querySelector('#modalContent input, #modalContent select');if(first)first.focus()}
  function closeModal(){document.getElementById('modalBackdrop').classList.remove('open');document.body.style.overflow=''}
  const formAmount=(value='')=>`<div class="form-block"><label class="fieldlabel" for="modalAmount">Сума в євро</label><input class="field" id="modalAmount" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" placeholder="Наприклад, 1000" required value="${esc(value)}"></div>`;
