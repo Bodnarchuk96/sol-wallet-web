@@ -178,7 +178,11 @@
     gateMode=mode;toggleGate(true);setMessage('');const exists=!!readLocal();
     if(mode==='start'){
       const msg=exists?'Введи свою секретну фразу, щоб побачити баланс і конверти.':'Створи приватний гаманець. Секретна фраза потрібна для доступу та відновлення резервних копій.';
-      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions"><button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">🛡️ Мій акаунт: email · пароль · 2FA</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
+      const slotActions=!active?(activeSlot==='old'
+        ? (localStorage.getItem(ORIGINAL_STORAGE)?'<button class="btn soft" id="gateForgot" type="button">🔑 Забув фразу? Зберегти старий гаманець</button>':'')
+          +(localStorage.getItem(NEW_STORAGE)?'<button class="btn" id="switchNew" type="button">🆕 Перейти до нового гаманця</button>':'')
+        : (localStorage.getItem(ORIGINAL_STORAGE)?'<button class="btn" id="switchOld" type="button">🔐 Старий зашифрований гаманець</button>':'')):'';
+      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions">${slotActions}<button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">🛡️ Мій акаунт: email · пароль · 2FA</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
       byId('vaultPass')?.focus();return;
     }
     if(mode==='cloud' || mode==='cloud-signup'){
@@ -210,6 +214,28 @@
     }
     if(mode==='cloud-upload'){
       getGateContent().innerHTML=`<div class="gate-panel"><h2>☁️ Синхронізація готова до запуску</h2><p>У хмарі ще немає гаманця цього акаунта. Перенести туди зашифровану копію з цього пристрою?</p><button id="confirmUpload" class="btn primary" type="button">🔐 Так, завантажити зашифровані дані</button><button id="gateReturn" class="btn ghost" type="button">Поки тільки локально</button></div>`;return;
+    }
+    if(mode==='forgot'){
+      if(active||!localStorage.getItem(ORIGINAL_STORAGE)){renderGate('start');return;}
+      getGateContent().innerHTML=localIntro()+
+        '<h2>🔑 Стара фраза забута</h2><p>Без первісної фрази зашифровані старі суми й операції неможливо відновити. Ми не видалятимемо їх і не будемо їх перезаписувати.</p>'+
+        '<p><strong>Крок 1.</strong> Завантаж зашифрований оригінал. Файл не відкриється без старої фрази, але збереже можливість майбутнього відновлення.</p>'+
+        '<button class="btn primary" type="button" id="archiveOriginal">📥 Зберегти старий зашифрований JSON</button>'+
+        '<p class="helper">Перевір у Завантаженнях файл SOL_Wallet_OLD_ENCRYPTED_*.json. Пароль не вводь і файл нікому не надсилай.</p>'+
+        '<button class="btn soft" type="button" id="createIsolated">Крок 2: новий порожній гаманець →</button></div>'+
+        '<div class="gate-actions"><button class="btn ghost" type="button" id="gateReturn">← Залишити все без змін</button></div>';return;
+    }
+    if(mode==='create-isolated'){
+      if(active||!oldArchiveRequested){renderGate('forgot');return;}
+      getGateContent().innerHTML=localIntro()+
+        '<h2>🆕 Окремий порожній гаманець</h2><div class="gate-warning"><strong>Старі гроші не перенесуться.</strong> Новий гаманець збереже всі свої записи в окремому зашифрованому сховищі. Старий запис і його архів залишаться незмінними.</div>'+
+        '<form data-vault-form="create-isolated"><label class="fieldlabel" for="separatePass">Нова секретна фраза</label>'+
+        field('password','separatePass','Від 12 символів','minlength="12" maxlength="200"')+
+        '<label class="fieldlabel" for="separatePass2">Повтори нову фразу</label>'+
+        field('password','separatePass2','Повтори точно','minlength="12" maxlength="200"')+
+        '<label class="gate-option"><input type="checkbox" id="confirmSeparate" required> Я перевірив, що старий зашифрований файл завантажився. Розумію, що новий гаманець буде порожнім, а для старого потрібна колишня секретна фраза.</label>'+
+        '<button class="btn primary" type="submit">✅ Створити окремий порожній гаманець</button></form></div>'+
+        '<div class="gate-actions"><button class="btn ghost" type="button" id="gateReturn">← Скасувати</button></div>';return;
     }
     if(mode==='restore'){
       getGateContent().innerHTML=`<div class="gate-panel"><h2>📥 Відновити приватний гаманець</h2><p>Обери зашифровану копію у форматі SOL Wallet v2. Дані цього пристрою будуть замінені.</p><form data-vault-form="restore"><label class="fieldlabel" for="gateRestoreFile">Файл .json</label><input class="field" id="gateRestoreFile" type="file" accept=".json,application/json" required><label class="fieldlabel" for="vaultPass">Секретна фраза копії</label>${field('password','vaultPass','Фраза від резервної копії','minlength="1" maxlength="200"')}<button class="btn primary" type="submit">Перевірити та відновити</button></form><button class="btn ghost" id="gateReturn" type="button">← Назад</button></div>`;return;
@@ -441,6 +467,14 @@
         await createLocal(pass,!!byId('migrateOld')?.checked);
         if(cloudEnabled){syncState='online';updateStatus()}
       }else if(task==='unlock'){await unlockLocal(byId('vaultPass').value)}
+      else if(task==='create-isolated'){
+        if(!byId('confirmSeparate')?.checked||!oldArchiveRequested)throw Error('Потрібно підтвердити збереження старого архіву.');
+        const pass=byId('separatePass').value;
+        if(pass!==byId('separatePass2').value)throw Error('Нові секретні фрази не збігаються.');
+        if(!confirm('Створити окремий ПОРОЖНІЙ гаманець? Старі записи залишаться зашифровані та НЕ перейдуть у новий.'))return;
+        await createIsolatedWallet(pass);
+        alert('Новий порожній гаманець створено. Старий зашифрований запис не змінено. Збережи нову фразу у менеджері паролів.');
+      }
       else if(task==='signup'){await signup(byId('accountEmail').value.trim(),byId('accountPassword').value)}
       else if(task==='signin'){await signin(byId('accountEmail').value.trim(),byId('accountPassword').value)}
       else if(task==='mfa-setup'||task==='mfa-verify'){await verifyMfa(byId('mfaCode').value.trim())}
@@ -462,9 +496,14 @@
   async function handleClick(e){
     const element=e.target.closest('button');if(!element)return;
     const v=element.id;
-    if(!['gateRestore','gateCloud','gateReturn','gateSignup','gateSignin','chooseRemote','chooseLocal','confirmUpload'].includes(v))return;
+    if(!['gateRestore','gateCloud','gateReturn','gateSignup','gateSignin','chooseRemote','chooseLocal','confirmUpload','gateForgot','archiveOriginal','createIsolated','switchNew','switchOld'].includes(v))return;
     try{
       if(v==='gateRestore')renderGate('restore');
+      if(v==='gateForgot'){oldArchiveRequested=false;renderGate('forgot');}
+      if(v==='archiveOriginal'){downloadOriginalLocked();setMessage('Запит на завантаження надісланий. Перевір, що старий JSON-файл справді є в Завантаженнях.');}
+      if(v==='createIsolated'){if(!oldArchiveRequested)throw Error('Спочатку завантаж стару зашифровану копію.');renderGate('create-isolated');}
+      if(v==='switchNew')switchVaultSlot('new');
+      if(v==='switchOld')switchVaultSlot('old');
       if(v==='gateCloud')renderGate('cloud');
       if(v==='gateReturn'){
         if(active){
