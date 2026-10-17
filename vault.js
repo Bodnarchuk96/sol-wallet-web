@@ -3,10 +3,18 @@
    No plaintext balances are uploaded. No bank connections. */
 'use strict';
 (function(){
-  const STORAGE='SOL_WALLET_V2_ENCRYPTED';
+  // Two independent encrypted vault slots. The original slot is NEVER repurposed.
+  const ORIGINAL_STORAGE='SOL_WALLET_V2_ENCRYPTED';
+  const NEW_STORAGE='SOL_WALLET_NEW_V1_ENCRYPTED';
+  const ACTIVE_SLOT_STORAGE='SOL_WALLET_ACTIVE_SLOT_V1';
+  const ORIGINAL_RECOVERY='SOL_WALLET_V6_ENCRYPTED_RECOVERY';
+  const NEW_RECOVERY='SOL_WALLET_NEW_V1_RECOVERY';
+  let activeSlot=localStorage.getItem(ACTIVE_SLOT_STORAGE)==='new'?'new':'old';
+  let STORAGE=activeSlot==='new'?NEW_STORAGE:ORIGINAL_STORAGE;
   const AUTH_STORAGE='SOL_WALLET_V2_AUTH';
   const LAST_SERVER='SOL_WALLET_V2_CLOUD_REV';
-  const RECOVERY_STORAGE='SOL_WALLET_V6_ENCRYPTED_RECOVERY';
+  let RECOVERY_STORAGE=activeSlot==='new'?NEW_RECOVERY:ORIGINAL_RECOVERY;
+  let oldArchiveRequested=false;
   const MAX_RECOVERY=5;
   const ROUNDS=310000;
   const te=new TextEncoder(),td=new TextDecoder();
@@ -99,7 +107,7 @@
     active=true;wallet.loadSnapshot(currentData);updateStatus();remember();
     // Reconnect only to the same verified account after a normal page reload.
     // Never auto-merge divergent encrypted revisions or overwrite another device.
-    if(hasCloud&&!cloudEnabled&&getAuth())reconnectSession().catch(()=>{});
+    if(activeSlot==='old'&&hasCloud&&!cloudEnabled&&getAuth())reconnectSession().catch(()=>{});
   }
   async function reconnectSession(){
     if(!active||!hasCloud)return;
@@ -168,6 +176,7 @@
   }
   async function createLocal(password,migrate){
     if(password.length<12)throw Error('Секретна фраза повинна мати щонайменше 12 символів.');
+    if(localStorage.getItem(STORAGE))throw Error('Тут уже є зашифрований гаманець. Щоб його не знищити, створення в цьому сховищі заборонене.');
     let data=migrate?wallet.legacyData():null;
     if(!data)data=wallet.snapshot();wallet.validate(data);
     const s=random(16),k=await derive(password,s,ROUNDS),blob=await seal(data,k,s,ROUNDS);
