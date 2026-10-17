@@ -133,6 +133,47 @@
   function getGateContent(){return byId('vaultGateContent')}
   const field=(type,id,placeholder='',extra='')=>`<input class="field" id="${id}" type="${type}" ${type==='password'?'autocomplete="off"':''} ${extra} placeholder="${placeholder}" required>`;
   const localIntro=()=>`<div class="gate-panel"><h2>🔐 Локальний захищений гаманець</h2><p>Локальний режим захищений секретною фразою; серверна 2FA діє тільки для окремого хмарного акаунта. Зашифровані записи залишаються у браузері.</p>`;
+  function archivedOriginal(){
+    const raw=localStorage.getItem(ORIGINAL_STORAGE);
+    if(!raw)throw Error('Зашифрований старий гаманець у цьому браузері не знайдено. Перевір інший пристрій або браузер.');
+    let blob;try{blob=JSON.parse(raw);checkPayload(blob)}catch(_){throw Error('Стара зашифрована копія пошкоджена. Нічого не замінено. Збережи дані браузера.');}
+    return {raw,blob};
+  }
+  function downloadOriginalLocked(){
+    const {raw}=archivedOriginal();
+    download('SOL_Wallet_OLD_ENCRYPTED_'+new Date().toISOString().slice(0,10)+'.json',raw);
+    oldArchiveRequested=true;
+  }
+  function switchVaultSlot(next){
+    if(active)throw Error('Спочатку заблокуй відкритий гаманець.');
+    if(next!=='new'&&next!=='old')throw Error('Невідомий слот гаманця.');
+    const slot=next==='new'?NEW_STORAGE:ORIGINAL_STORAGE;
+    if(!localStorage.getItem(slot))throw Error('Вибраний гаманець у цьому браузері не знайдено.');
+    localStorage.setItem(ACTIVE_SLOT_STORAGE,next);
+    activeSlot=next;STORAGE=slot;RECOVERY_STORAGE=next==='new'?NEW_RECOVERY:ORIGINAL_RECOVERY;
+    oldArchiveRequested=false;renderGate('start');
+  }
+  async function createIsolatedWallet(password){
+    if(active)throw Error('Новий слот можна створити лише із заблокованого гаманця.');
+    if(!oldArchiveRequested)throw Error('Спочатку завантаж зашифровану копію старого гаманця.');
+    if(typeof password!=='string'||password.length<12||password.length>200)throw Error('Нова секретна фраза має містити 12–200 символів.');
+    if(localStorage.getItem(NEW_STORAGE))throw Error('Новий гаманець уже існує! Його не можна перезаписувати. Перейди до нього через перемикач.');
+    if(account||auth||getAuth()||cloudEnabled)throw Error('Хмарна сесія активна. Вийди з акаунта перед створенням нового окремого гаманця.');
+    await queue;
+    const old=archivedOriginal();
+    const state=wallet.snapshot();wallet.validate(state);
+    const nextSalt=random(16),nextKey=await derive(password,nextSalt,ROUNDS);
+    const newBlob=await seal(state,nextKey,nextSalt,ROUNDS);
+    const tested=await openSealed(newBlob,password);
+    if(localStorage.getItem(ORIGINAL_STORAGE)!==old.raw)throw Error('Старий запис змінився під час підготовки. Нічого не замінено.');
+    if(localStorage.getItem(NEW_STORAGE))throw Error('Новий запис з’явився в іншій вкладці. Перезапис заборонено.');
+    localStorage.setItem(NEW_STORAGE,JSON.stringify(newBlob));
+    if(localStorage.getItem(ORIGINAL_STORAGE)!==old.raw)throw Error('Старий запис змінився. Перевір копії перед наступними діями.');
+    localStorage.setItem(ACTIVE_SLOT_STORAGE,'new');
+    activeSlot='new';STORAGE=NEW_STORAGE;RECOVERY_STORAGE=NEW_RECOVERY;
+    oldArchiveRequested=false;
+    activate(tested,newBlob);
+  }
   function renderGate(mode='start'){
     gateMode=mode;toggleGate(true);setMessage('');const exists=!!readLocal();
     if(mode==='start'){
