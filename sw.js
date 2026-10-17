@@ -1,5 +1,5 @@
 /* SOL Wallet 10 offline shell. Cache only application assets; encrypted finances remain in browser storage. */
-const CACHE='sol-wallet-v11-private-mfa-2026-10-17';
+const CACHE='sol-wallet-v11-backup-quick-access-2026-10-17';
 const SHELL=['./','./index.html','./budget.js','./budget.css','./currency-core.js','./currency-ui.js','./currency.css','./family-budget.js','./family-budget.css','./manifest.webmanifest','./icon.svg','./robots.txt'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('sol-wallet-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
