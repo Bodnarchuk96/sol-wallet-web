@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b1823">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-qOnzAzzh81VAI/zmRoHl+njhP9sR7wo2avfgVTEL+k4=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-AfKOrUoF4/OsVPz8QStRGAoNE17+ITZRyKJtjgz5kBQ='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-v4gQ9pz4T1CteqOAqlSPKN/DoKCdY7nsKx7+W+gM7pg=' 'sha256-qOnzAzzh81VAI/zmRoHl+njhP9sR7wo2avfgVTEL+k4=' 'sha256-+/0v7VXiNWJHnk1pT8YdB/LJct4bKrYIo+67c75zen0=' 'sha256-q4Xq0qJNsrwX0rWtoytMxgMoAGhaShOiwkZg2p6UPqU=' 'sha256-Tw4/IgWi7nYRY9WGhBY8wMXki9ZGmUm74+bw34pV9oA=' 'sha256-GIZwr4Gn15yTkQ8NyrmJ0KIz680K4BS7WYXZdeRxrhU='; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow,nosnippet,noarchive">
   <meta name="description" content="SOL Wallet — особистий і бізнесовий бюджет із розподілом надходжень за конвертами.">
@@ -267,6 +267,10 @@
 .recovery-row small{color:#9ab4bc;font-size:11px}
 @media(max-width:420px){.recovery-row{align-items:stretch;flex-direction:column}.recovery-row .btn{align-self:flex-start}}
 
+.backup-quickbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-1px 0 16px;padding:12px 15px;border:1px solid #345b64;border-radius:15px;background:#102e37}
+.backup-quickbar .btn{flex-shrink:0;min-height:44px}
+.backup-quickbar small{flex:1;min-width:170px;color:#acc9cf;font-size:12px;line-height:1.5}
+@media(max-width:480px){.backup-quickbar .btn{width:100%}.backup-quickbar{gap:8px}}
 </style>
 </head>
 <body>
@@ -308,6 +312,10 @@
     <button type="button" id="openFamilyDashboard" class="currency-quicklink sf-quicklink" aria-label="Відкрити сімейний калькулятор">
       <span class="currency-quick-icons">🏠 🧮</span><span class="currency-quick-copy"><strong>Сімейний калькулятор</strong><small>Надходження · покупки · готівка · ліміти · залишок</small></span><span class="currency-quick-arrow">→</span>
     </button>
+    <section class="backup-quickbar" aria-label="Захищена резервна копія">
+      <button type="button" class="btn soft" id="walletBackupQuick">🔐 Зберегти зашифровану копію</button>
+      <small id="backupQuickStatus" role="status" aria-live="polite">Перед підключенням 2FA збережи приватну копію JSON. Секретну фразу зберігай окремо.</small>
+    </section>
     <div id="content"></div>
     <div class="bottom-note">SOL Wallet v10.0 · Зашифрований особистий планувальник · EUR і UAH обліковуються окремо · Не є банком чи податковою консультацією</div>
   </main>
@@ -1473,6 +1481,13 @@
    removeLegacy(){localStorage.removeItem(KEY)},
    afterRestore(data){validate(data);state=window.SOLPlanner.ensurePlanner(clone(data));R.ensureSettings(state);ui.page='overview';render();window.SOLReminderNotifier?.update(state)}
  };
+ document.getElementById('walletBackupQuick')?.addEventListener('click',async function(){
+   if(document.querySelector('.app.locked'))return;
+   const status=document.getElementById('backupQuickStatus');this.disabled=true;
+   try{await window.SOLVault.exportEncrypted();if(status)status.textContent='Запит на завантаження надіслано браузеру. Перевір файл SOL_Wallet_ENCRYPTED_…json у Завантаженнях. Не надсилай його нікому.';}
+   catch(err){if(status)status.textContent='Не вдалося завантажити копію: '+(err?.message||'перевір сховище браузера');}
+   finally{this.disabled=false;}
+ });
  document.getElementById('lockWallet').addEventListener('click',()=>window.SOLVault.lock());
  window.SOLVault.init(window.SOLWalletAPI);
 })();
