@@ -182,7 +182,7 @@
         ? (localStorage.getItem(ORIGINAL_STORAGE)?'<button class="btn soft" id="gateForgot" type="button">🔑 Забув фразу? Зберегти старий гаманець</button>':'')
           +(localStorage.getItem(NEW_STORAGE)?'<button class="btn" id="switchNew" type="button">🆕 Перейти до нового гаманця</button>':'')
         : (localStorage.getItem(ORIGINAL_STORAGE)?'<button class="btn" id="switchOld" type="button">🔐 Старий зашифрований гаманець</button>':'')):'';
-      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions">${slotActions}<button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud?'<button class="btn soft" id="gateCloud" type="button">🛡️ Мій акаунт: email · пароль · 2FA</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
+      getGateContent().innerHTML=localIntro()+`<form data-vault-form="${exists?'unlock':'create'}">${msg}<label class="fieldlabel" for="vaultPass">Секретна фраза</label>${field('password','vaultPass',exists?'Поточна секретна фраза':'Мінімум 12 символів',exists?'minlength="1" maxlength="200"':'minlength="12" maxlength="200"')}${!exists?`<label class="fieldlabel" for="vaultPass2">Повтори секретну фразу</label>${field('password','vaultPass2','Повтори точно','minlength="12" maxlength="200"')}${wallet.legacyData()?'<label class="gate-option"><input type="checkbox" id="migrateOld" checked> Перенести записи з незахищеної версії v1</label>':''}`:''}<button class="btn primary" type="submit">${exists?'🔓 Відкрити гаманець':'🔐 Створити захищений гаманець'}</button></form><p class="helper">${exists?'Введи саме ту фразу, якою був зашифрований цей гаманець — навіть якщо вона коротша за 12 символів. Фраза не зберігається й не надсилається.':'Для нового гаманця потрібна секретна фраза від 12 символів. Якщо втратиш її, відновити вміст буде неможливо.'}</p></div><div class="gate-actions">${slotActions}<button class="btn" id="gateRestore" type="button">📥 Відновити захищений JSON</button>${hasCloud&&activeSlot==='old'?'<button class="btn soft" id="gateCloud" type="button">🛡️ Мій акаунт: email · пароль · 2FA</button>':'<div class="gate-option">☁️ Синхронізація буде доступна після підключення приватної бази даних.</div>'}${active?'<button class="btn ghost" id="gateReturn" type="button">← Повернутися до гаманця</button>':''}</div><input id="gateFile" type="file" accept=".json,application/json" hidden>`;
       byId('vaultPass')?.focus();return;
     }
     if(mode==='cloud' || mode==='cloud-signup'){
@@ -343,6 +343,7 @@
     renderGate('cloud');setMessage('Перевір пошту й підтвердь створення акаунта. Після цього увійди. Якщо реєстрацію вимкнено, акаунт додає адміністратор.');
   }
   async function remoteRead(){
+    if(activeSlot==='new')throw Error('Доступ до хмари старого гаманця із нового профілю заборонено.');
     mfaRequired();
     const route='/rest/v1/sol_wallets?select=revision,payload,updated_at&user_id=eq.'+encodeURIComponent(account.id);
     const rows=await readApi(route,{token:await authorizedToken()});
@@ -352,6 +353,7 @@
     checkPayload(rows[0].payload);return rows[0];
   }
   async function cloudOpen(){
+    if(activeSlot==='new')throw Error('Новий гаманець не підключено до окремої хмари. Підключення поки заблоковане для збереження старих даних.');
     mfaRequired();
     pendingRemote=await remoteRead();remoteRevision=pendingRemote?.revision??null;
     const local=readLocal();
@@ -369,6 +371,7 @@
     renderGate('remote-unlock');
   }
   async function remoteWrite(blob,{replace=false}={}){
+    if(activeSlot==='new')throw Error('Новий гаманець не може записувати у старий хмарний акаунт.');
     checkPayload(blob);
     const t=await authorizedToken();
     if(remoteRevision===null){
@@ -408,6 +411,7 @@
   }
   async function syncNow(){
     if(!active)throw Error('Спочатку відкрий гаманець');
+    if(activeSlot==='new')throw Error('Новий гаманець працює локально. Синхронізацію до окремої хмари налаштуємо після резервної копії.');
     if(account)mfaRequired();
     if(!hasCloud)throw Error('Хмара поки не налаштована. Заповни поля нижче у «Дані та безпека».');
     if(!account){renderGate('cloud');return 'signin'}
@@ -455,6 +459,7 @@
     }catch(e){if(e.name==='OperationError')throw Error('Файл не розшифровується поточним ключем. Заблокуй і віднови з секретною фразою копії.');throw e}
   }
   function showCloud(){if(!active)return;
+    if(activeSlot==='new'){const where=byId('syncInfo');if(where)where.textContent='Новий локальний гаманець поки не підключено до окремого Supabase-проєкту. Стару хмару не використовуємо.';return;}
     if(!hasCloud){const where=byId('syncInfo');if(where)where.textContent='☁️ Для хмарної синхронізації потрібна власна база Supabase і налаштований конфігураційний файл. Поки що дані залишаються захищеними локально.';return}
     renderGate('cloud');
   }
