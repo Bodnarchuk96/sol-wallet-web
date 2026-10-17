@@ -1,0 +1,24 @@
+name: SOL Wallet tests
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "vault.js"
+      - "sw.js"
+      - "tests/**"
+      - ".github/workflows/sol-wallet-recovery-tests.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify JavaScript and tests
+        run: |
+          node --check vault.js
+          node --test tests/*.test.cjs
